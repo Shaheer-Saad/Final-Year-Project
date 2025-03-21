@@ -1,12 +1,19 @@
 {% load static %}
 
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
     <link rel="stylesheet" href="{% static 'EcoCrop/CSS/Dashboard.css' %}" />
     <script src="{% static 'EcoCrop/JavaScript/Dashboard.js' %}" defer></script>
   </head>
+
   <body>
+    <h2>Welcome to EcoCrop!</h2>
+    <button onclick="showLogoutModal()">Logout</button>
+
     <div id="logoutModal" class="modal">
       <div class="modal-content">
         <p>Are you sure you want to log out?</p>
@@ -15,7 +22,10 @@
       </div>
     </div>
 
-    <h2>Welcome to EcoCrop!</h2>
-    <a href="#" onclick="showLogoutModal()">Logout</a>
+    <div class="container">
+      <h2>Specify your action</h2>
+      <button onclick="window.location.href='{% url "Visualizations_page" %}'">Generate Visualizations</button>
+      <button onclick="window.location.href='{% url "Predictions_page" %}'">Get Predictions</button>
+    </div>
   </body>
 </html>

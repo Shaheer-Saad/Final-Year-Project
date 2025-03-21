@@ -1,0 +1,76 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visualizations</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'EcoCrop/CSS/Visualizations_page.css' %}"
+    />
+    <script
+      src="{% static 'EcoCrop/JavaScript/Visualizations_page.js' %}"
+      defer
+    ></script>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  </head>
+
+  <body>
+    <div class="Container">
+      <!-- Step 1: Select Category -->
+      <div id="step1" class="hidden">
+        <h4>Select Category:</h4>
+        <select id="category">
+          <option value="">Choose...</option>
+          <option value="Climate">Climate</option>
+          <option value="Economy">Economy</option>
+          <option value="Economy with Climate Index">Economy with Climate Index</option>
+          <option value="Production with Climate Index">Production with Climate Index</option>
+          <option value="Yield with Climate Index">Yield with Climate Index</option>
+          <option value="Production and Yield">Production and Yield</option>
+          <option value="Cultivated Area and Production">Cultivated Area and Production</option>
+          <option value="Cultivated Area and Yield">Cultivated Area and Yield</option>
+        </select>
+        <button onclick="fetchColumns()">Next</button>
+        <button onclick="window.location.href='{% url "Dashboard" %}'">Back</button>
+      </div>
+
+      <!-- Step 2: Select Visualization Type -->
+      <div id="step2" class="hidden">
+        <h4>Select Visualization Type:</h4>
+        <select id="visType">
+          <option value="">Choose...</option>
+          <option value="bar">Bar Chart</option>
+          <option value="line">Line Chart</option>
+          <option value="scatter">Scatter Plot</option>
+          <option value="histogram">Histogram</option>
+          <option value="3d">3D Plot</option>
+        </select>
+        <button onclick="toggleZAxisDropdown()">Next</button>
+        <button onclick="prevStep(1)">Back</button>
+      </div>
+
+      <!-- Step 3: Select Axes -->
+      <div id="step3" class="hidden">
+        <h4>Select Axes:</h4>
+        <label for="xAxis" id="labelForXAxis">X-Axis:</label>
+        <select id="xAxis"></select>
+        <label for="yAxis" id="labelForYAxis">Y-Axis:</label>
+        <select id="yAxis"></select>
+        <label for="zAxis" id="labelForZAxis">Z-Axis:</label>
+        <select id="zAxis"></select>
+        <button onclick="generateVisualization()">Generate</button>
+        <button onclick="prevStep(2)">Back</button>
+      </div>
+
+      <!-- Step 4: Display Visualization -->
+      <div id="step4" class="hidden">
+        <h4>Generated Visualization:</h4>
+        <div id="plot-container"></div>
+        <button onclick="prevStep(3)">Back</button>
+      </div>
+    </div>
+  </body>
+</html>
