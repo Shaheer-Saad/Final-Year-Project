@@ -32,9 +32,6 @@ function prevStep(step) {
 function fetchColumns() {
     let selectedCategory = document.getElementById("category").value;
 
-    // Debugging: Print the data before sending
-    console.log("Sending Data:", JSON.stringify({ category: selectedCategory }));
-
     if (!selectedCategory) {
         alert("Please select a category first.");
         return;
@@ -50,51 +47,85 @@ function fetchColumns() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log("Received response:", data); // Debugging: Log the received response
-
         if (data.success) {
-            populateDropdown("xAxis", data.columns);
-            populateDropdown("yAxis", data.columns);
-            populateDropdown("zAxis", data.columns);
-
-            // let visualizationType = document.getElementById("visType").value;
-            // toggleZAxisDropdown(visualizationType, data.columns); // Check if z-axis should be shown
+            populateDropdown("xAxis", data.axes_values[0], selectedCategory);
+            populateDropdown("yAxis", data.axes_values[1], selectedCategory);
+            populateDropdown("zAxis", data.axes_values[2], selectedCategory);
             
             nextStep(2);  // Move to the next step only after fetching columns
         } else {
-            alert("Failed to fetch columns.");
+            alert("There was an error while communicating to the server!");
         }
     })
     .catch(error => console.error("Error:", error));
 }
 
-function populateDropdown(dropdownId, options) {
+function populateDropdown(dropdownId, options, category) {
     let dropdown = document.getElementById(dropdownId);
 
-    if (!dropdown) {
-        console.error(`Dropdown with ID "${dropdownId}" not found.`);
-        return;
+    if (["yAxis", "zAxis"].includes(dropdownId)) {
+        console.log('Current dropdown ID:', dropdownId)
+        if (["Economy", "Economy with Climate Index"].includes(category)) {
+            document.getElementById("specific" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)).classList.remove("hidden");
+            let cropsDropdown = document.getElementById("cropsFor" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1));
+            let otherColumnsDropdown = document.getElementById("otherColumnsFor" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1));
+            cropsDropdown.innerHTML = '<option value="">Choose...</option>'; // Reset dropdown
+            options[0].forEach(option => {
+                let opt = document.createElement("option");
+                opt.value = option;
+                opt.textContent = option;
+                cropsDropdown.appendChild(opt);
+            });
+            cropsDropdown.addEventListener("change", function () {
+                filterDropdownOptions(dropdownId, category);
+            });
+            otherColumnsDropdown.innerHTML = '<option value="">Choose...</option>'; // Reset dropdown
+            options[1].forEach(option => {
+                let opt = document.createElement("option");
+                opt.value = option;
+                opt.textContent = option;
+                otherColumnsDropdown.appendChild(opt);
+            });
+            otherColumnsDropdown.addEventListener("change", function () {
+                filterDropdownOptions(dropdownId, category);
+            });
+        } else {
+            document.getElementById("general" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)).classList.remove("hidden");
+            let generalDropdown = document.getElementById("general" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1) + "Dropdown");
+            generalDropdown.innerHTML = '<option value="">Choose...</option>'; // Reset dropdown
+            options.forEach(option => {
+                let opt = document.createElement("option");
+                opt.value = option;
+                opt.textContent = option;
+                generalDropdown.appendChild(opt);
+            });
+            generalDropdown.addEventListener("change", function () {
+                filterDropdownOptions(dropdownId, category);
+            });
+        }
+    } else {
+        dropdown.innerHTML = '<option value="">Choose...</option>'; // Reset dropdown
+        options.forEach(option => {
+            let opt = document.createElement("option");
+            opt.value = option;
+            opt.textContent = option;
+            dropdown.appendChild(opt);
+        });
+        dropdown.addEventListener("change", function () {
+            filterDropdownOptions(dropdownId, category);
+        });
     }
-
-    dropdown.innerHTML = '<option value="">Choose...</option>'; // Reset dropdown
-    options.forEach(option => {
-        let opt = document.createElement("option");
-        opt.value = option;
-        opt.textContent = option;
-        dropdown.appendChild(opt);
-    });
-
-    dropdown.addEventListener("change", filterDropdownOptions);
 }
 
 // Show or hide the Z-axis dropdown based on the visualization type
 function toggleZAxisDropdown() {
     let visualizationType = document.getElementById("visType").value;
-    console.log("Visualization type:", visualizationType);
-    let labelForZAxis = document.getElementById("labelForZAxis");
+    if (!visualizationType) {
+        alert("Please select a type of visualization first.")
+        return
+    }
     let zAxisDropdownContainer = document.getElementById("zAxis");
     if (visualizationType !== "3d") {
-        labelForZAxis.style.display = "none";
         zAxisDropdownContainer.style.display = "none"; // Hide the Z-axis dropdown
         nextStep(3);
     } else {
@@ -104,31 +135,118 @@ function toggleZAxisDropdown() {
 }
 
 // Prevent duplicate selections across dropdowns
-function filterDropdownOptions() {
+function filterDropdownOptions(dropdownId, category) {
     let selectedValues = new Set();
-    
-    // Collect selected values from all dropdowns
-    ["xAxis", "yAxis", "zAxis"].forEach(id => {
-        let dropdown = document.getElementById(id);
-        if (dropdown && dropdown.value) {
-            selectedValues.add(dropdown.value);
-        }
-    });
 
-    // Update each dropdown to remove already-selected options
-    ["xAxis", "yAxis", "zAxis"].forEach(id => {
-        let dropdown = document.getElementById(id);
-        if (dropdown) {
-            let options = [...dropdown.options];
-            options.forEach(option => {
-                if (option.value && selectedValues.has(option.value) && option.value !== dropdown.value) {
-                    option.hidden = true;
-                } else {
-                    option.hidden = false;
+    if (["yAxis", "zAxis"].includes(dropdownId)) {
+        if (["Economy", "Economy with Climate Index"].includes(category)) {
+            // Collect selected values from all dropdowns
+            ["otherColumnsForYAxis", "otherColumnsForZAxis"].forEach(id => {
+                let dropdown = document.getElementById(id);
+                if (dropdown && dropdown.value) {
+                    selectedValues.add(dropdown.value);
+                }
+            });
+            console.log("Selected values:", selectedValues)
+
+            setTimeout(() => {}, 1000); // 2000ms = 2 seconds
+            // Update each dropdown to remove already-selected options
+            ["otherColumnsForYAxis", "otherColumnsForZAxis"].forEach(id => {
+                let dropdown = document.getElementById(id);// "otherColumnsForZAxis");
+                if (dropdown) {
+                    let options = [...dropdown.options];
+                    options.forEach(option => {
+                        console.log(option);
+                        if (document.getElementById("cropsForYAxis")?.value === document.getElementById("cropsForZAxis")?.value) {
+                            console.log("Crops are same.");
+                            if (option.value && selectedValues.has(option.value) && option.value !== dropdown.value) {
+                                option.hidden = true;
+                            } else {
+                                option.hidden = false;
+                            }
+                        } else {
+                            option.hidden = false;
+                        }
+                    });
+                }
+            });
+            // Collect selected values from all dropdowns
+            ["cropsForYAxis", "cropsForZAxis"].forEach(id => {
+                let dropdown = document.getElementById(id);
+                if (dropdown && dropdown.value) {
+                    selectedValues.add(dropdown.value);
+                }
+            });
+            console.log("Selected values:", selectedValues)
+
+            setTimeout(() => {}, 1000); // 2000ms = 2 seconds
+            // Update each dropdown to remove already-selected options
+            ["cropsForYAxis", "cropsForZAxis"].forEach(id => {
+                let dropdown = document.getElementById(id);// "otherColumnsForZAxis");
+                if (dropdown) {
+                    let options = [...dropdown.options];
+                    options.forEach(option => {
+                        console.log(option);
+                        if (document.getElementById("otherColumnsForYAxis")?.value === document.getElementById("otherColumnsForZAxis")?.value) {
+                            console.log("Specified values are same.");
+                            if (option.value && selectedValues.has(option.value) && option.value !== dropdown.value) {
+                                option.hidden = true;
+                            } else {
+                                option.hidden = false;
+                            }
+                        } else {
+                            option.hidden = false;
+                        }
+                    });
+                }
+            });
+        } else {
+            // Collect selected values from all dropdowns
+            ["generalYAxisDropdown", "generalZAxisDropdown"].forEach(id => {
+                let dropdown = document.getElementById(id);
+                if (dropdown && dropdown.value) {
+                    selectedValues.add(dropdown.value);
+                }
+            });
+            
+            // Update each dropdown to remove already-selected options
+            ["generalYAxisDropdown", "generalZAxisDropdown"].forEach(id => {
+                let dropdown = document.getElementById(id);
+                if (dropdown) {
+                    let options = [...dropdown.options];
+                    options.forEach(option => {
+                        if (option.value && selectedValues.has(option.value) && option.value !== dropdown.value) {
+                            option.hidden = true;
+                        } else {
+                            option.hidden = false;
+                        }
+                    });
                 }
             });
         }
-    });
+    }
+    // // Collect selected values from all dropdowns
+    // ["xAxis", "yAxis", "zAxis"].forEach(id => {
+    //     let dropdown = document.getElementById(id);
+    //     if (dropdown && dropdown.value) {
+    //         selectedValues.add(dropdown.value);
+    //     }
+    // });
+
+    // // Update each dropdown to remove already-selected options
+    // ["xAxis", "yAxis", "zAxis"].forEach(id => {
+    //     let dropdown = document.getElementById(id);
+    //     if (dropdown) {
+    //         let options = [...dropdown.options];
+    //         options.forEach(option => {
+    //             if (option.value && selectedValues.has(option.value) && option.value !== dropdown.value) {
+    //                 option.hidden = true;
+    //             } else {
+    //                 option.hidden = false;
+    //             }
+    //         });
+    //     }
+    // });
 }
 
 function generateVisualization() {

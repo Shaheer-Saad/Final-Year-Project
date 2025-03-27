@@ -1,6 +1,10 @@
 from django.shortcuts import render
 import os
-import pandas as pd
+from .metadata_about_dataset import (
+    dictionary_of_dataframes,
+    dictionary_of_columns,
+    get_name,
+)
 import plotly.express as px
 from django.http import HttpRequest, JsonResponse
 from rest_framework.decorators import api_view
@@ -26,34 +30,6 @@ def predictions(request):
     return render(request, "Predictions_page.html")
 
 
-climate_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Climate Data")
-economy_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Economy Data")
-economy_with_climate_index_df = pd.read_excel(
-    "fyp_dataset.xlsx", sheet_name="Economy with Climate Index"
-)
-production_with_climate_index_df = pd.read_excel(
-    "fyp_dataset.xlsx", sheet_name="production|climate index"
-)
-yield_with_climate_index_df = pd.read_excel(
-    "fyp_dataset.xlsx", sheet_name="yield|climate index"
-)
-production_yield_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="production|yield")
-area_and_production_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Area|production")
-area_and_yield_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Yield|Area")
-others_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="remaining data")
-
-dictionary_of_dataframes = {
-    "Climate": climate_df,
-    "Economy": economy_df,
-    "Economy with Climate Index": economy_with_climate_index_df,
-    "Production with Climate Index": production_with_climate_index_df,
-    "Yield with Climate Index": yield_with_climate_index_df,
-    "Production and Yield": production_yield_df,
-    "Cultivated Area and Production": area_and_production_df,
-    "Cultivated Area and Yield": area_and_yield_df,
-}
-
-
 @api_view(["POST"])
 def fetch_columns(request: HttpRequest):
     try:
@@ -69,12 +45,41 @@ def fetch_columns(request: HttpRequest):
             )
 
         df = dictionary_of_dataframes[category]
-        columns = df.columns.tolist()
+        columns = list(dictionary_of_columns[get_name(df)].keys())
+
+        if category in ["Economy", "Economy with Climate Index"]:
+            x_axis = ["Duration"]
+            y_axis = [
+                df["Crop"].unique().tolist(),
+                [
+                    column
+                    for column in columns
+                    if (column not in x_axis) and (column != "Crop")
+                ],
+            ]
+            z_axis = y_axis
+        elif category == "Climate":
+            x_axis = ["Month of Year"]
+            y_axis = [column for column in columns if column not in x_axis]
+            z_axis = y_axis
+        elif category in [
+            "Production and Yield",
+            "Cultivated Area and Production",
+            "Cultivated Area and Yield",
+            "Production with Climate Index",
+            "Yield with Climate Index",
+        ]:
+            x_axis = ["Crops"]
+            y_axis = [column for column in columns if column not in x_axis]
+            z_axis = y_axis
+
+        axes_values = [x_axis, y_axis, z_axis]
 
         # Debugging output
-        print(f"Columns for {category}: {columns}")
+        print(f"Columns for {category}: {axes_values}")
 
-        return JsonResponse({"success": True, "columns": columns})
+        return JsonResponse({"success": True, "axes_values": axes_values})
+        # return JsonResponse({"success": True, "columns": columns})
 
     except Exception as e:
         print("There's an issue!")

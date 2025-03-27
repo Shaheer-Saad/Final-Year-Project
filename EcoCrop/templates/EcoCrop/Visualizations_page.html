@@ -57,10 +57,32 @@
         <h4>Select Axes:</h4>
         <label for="xAxis" id="labelForXAxis">X-Axis:</label>
         <select id="xAxis"></select>
-        <label for="yAxis" id="labelForYAxis">Y-Axis:</label>
-        <select id="yAxis"></select>
-        <label for="zAxis" id="labelForZAxis">Z-Axis:</label>
-        <select id="zAxis"></select>
+        <div id="yAxis">
+          <div id="generalYAxis" class="hidden">
+            <label for="generalYAxis" id="labelForGeneralYAxis">Y-Axis:</label>
+            <select id="generalYAxisDropdown"></select>
+          </div>
+          <div id="specificYAxis" class="hidden">
+            <label for="specificYAxis" id="labelForSpecificYAxis">Y-Axis:</label>
+            <label for="cropsForYAxis" id="labelForCropsForYAxis">Crop:</label>
+            <select id="cropsForYAxis"></select>
+            <label for="otherColumnsForYAxis" id="labelForOtherColumnsForYAxis">Specify a Value for the Crop:</label>
+            <select id="otherColumnsForYAxis"></select>
+          </div>
+        </div>
+        <div id="zAxis">
+          <div id="generalZAxis" class="hidden">
+            <label for="generalZAxis" id="labelForGeneralZAxis">Z-Axis:</label>
+            <select id="generalZAxisDropdown"></select>
+          </div>
+          <div id="specificZAxis" class="hidden">
+            <label for="specificZAxis" id="labelForSpecificZAxis">Z-Axis:</label>
+            <label for="cropsForZAxis" id="labelForCropsForZAxis">Crop:</label>
+            <select id="cropsForZAxis"></select>
+            <label for="otherColumnsForZAxis" id="labelForOtherColumnsForZAxis">Specify a Value for the Crop:</label>
+            <select id="otherColumnsForZAxis"></select>
+          </div>
+        </div>
         <button onclick="generateVisualization()">Generate</button>
         <button onclick="prevStep(2)">Back</button>
       </div>
