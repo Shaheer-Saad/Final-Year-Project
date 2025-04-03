@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -18,81 +17,148 @@
   </head>
 
   <body>
-    <div class="Container">
-      <!-- Step 1: Select Category -->
-      <div id="step1" class="hidden">
-        <h4>Select Category:</h4>
-        <select id="category">
-          <option value="">Choose...</option>
-          <option value="Climate">Climate</option>
-          <option value="Economy">Economy</option>
-          <option value="Economy with Climate Index">Economy with Climate Index</option>
-          <option value="Production with Climate Index">Production with Climate Index</option>
-          <option value="Yield with Climate Index">Yield with Climate Index</option>
-          <option value="Production and Yield">Production and Yield</option>
-          <option value="Cultivated Area and Production">Cultivated Area and Production</option>
-          <option value="Cultivated Area and Yield">Cultivated Area and Yield</option>
-        </select>
-        <button onclick="fetchColumns()">Next</button>
-        <button onclick="window.location.href='{% url "Dashboard" %}'">Back</button>
-      </div>
+    <div id="visualizations-container">
+      <!-- Visualizations will be added here dynamically -->
+    </div>
 
-      <!-- Step 2: Select Visualization Type -->
-      <div id="step2" class="hidden">
-        <h4>Select Visualization Type:</h4>
-        <select id="visType">
-          <option value="">Choose...</option>
-          <option value="bar">Bar Chart</option>
-          <option value="line">Line Chart</option>
-          <option value="scatter">Scatter Plot</option>
-          <option value="histogram">Histogram</option>
-          <option value="3d">3D Plot</option>
-        </select>
-        <button onclick="toggleZAxisDropdown()">Next</button>
-        <button onclick="prevStep(1)">Back</button>
-      </div>
+    <!-- Hidden template for new visualizations -->
+    <div id="visualization-template" class="hidden">
+      <div class="visualization-wrapper">
+        <div class="Container">
+          <!-- Step 1: Select Category -->
+          <div class="step1">
+            <h4>Select Category:</h4>
+            <select class="category">
+              <option value="">Choose...</option>
+              <option value="Climate">Climate</option>
+              <option value="Economy">Economy</option>
+              <option value="Economy with Climate Index">
+                Economy with Climate Index
+              </option>
+              <option value="Production with Climate Index">
+                Production with Climate Index
+              </option>
+              <option value="Yield with Climate Index">
+                Yield with Climate Index
+              </option>
+              <option value="Production and Yield">Production and Yield</option>
+              <option value="Cultivated Area and Production">
+                Cultivated Area and Production
+              </option>
+              <option value="Cultivated Area and Yield">
+                Cultivated Area and Yield
+              </option>
+            </select>
+            <button class="next-btn" onclick="fetchColumns(this)">
+              <span class="btn-text">Next</span>
+            </button>
+            <button
+              class="dashboard-btn"
+              data-dashboard-url="{% url 'Dashboard' %}"
+            >
+              Back to Dashboard
+            </button>
+          </div>
 
-      <!-- Step 3: Select Axes -->
-      <div id="step3" class="hidden">
-        <h4>Select Axes:</h4>
-        <label for="xAxis" id="labelForXAxis">X-Axis:</label>
-        <select id="xAxis"></select>
-        <div id="yAxis">
-          <div id="generalYAxis" class="hidden">
-            <label for="generalYAxis" id="labelForGeneralYAxis">Y-Axis:</label>
-            <select id="generalYAxisDropdown"></select>
+          <!-- Step 2: Select Visualization Type -->
+          <div class="step2 hidden">
+            <h4>Select Visualization Type:</h4>
+            <select class="visType">
+              <option value="">Choose...</option>
+              <option value="bar">Bar Chart</option>
+              <option value="line">Line Chart</option>
+              <option value="scatter">Scatter Plot</option>
+              <option value="histogram">Histogram</option>
+              <option value="3d">3D Plot</option>
+            </select>
+            <button class="next-btn" onclick="toggleZAxisDropdown(this)">
+              <span class="btn-text">Next</span>
+              <span class="loading-spinner hidden">Loading...</span>
+            </button>
+            <button class="prev-btn">Back</button>
           </div>
-          <div id="specificYAxis" class="hidden">
-            <label for="specificYAxis" id="labelForSpecificYAxis">Y-Axis:</label>
-            <label for="cropsForYAxis" id="labelForCropsForYAxis">Crop:</label>
-            <select id="cropsForYAxis"></select>
-            <label for="otherColumnsForYAxis" id="labelForOtherColumnsForYAxis">Specify a Value for the Crop:</label>
-            <select id="otherColumnsForYAxis"></select>
+
+          <!-- Step 3: Select Axes -->
+          <div class="step3 hidden">
+            <h4>Select Axes:</h4>
+            <div class="error-message hidden"></div>
+
+            <label class="labelForXAxis">X-Axis:</label>
+            <select class="xAxis"></select>
+
+            <div class="yAxis" id="yAxisContainer">
+              <div class="generalYAxis hidden">
+                <label class="labelForGeneralYAxis">Y-Axis:</label>
+                <select class="generalYAxisDropdown" data-axis="y"></select>
+              </div>
+              <div class="specificYAxis hidden">
+                <label class="labelForSpecificYAxis">Y-Axis:</label>
+                <label class="labelForCropsForYAxis">Crop:</label>
+                <select
+                  class="cropsForYAxis"
+                  data-axis-type="crop"
+                  data-axis="y"
+                ></select>
+                <label class="labelForOtherColumnsForYAxis"
+                  >Specify a Value for the Crop:</label
+                >
+                <select
+                  class="otherColumnsForYAxis"
+                  data-axis-type="metric"
+                  data-axis="y"
+                ></select>
+              </div>
+            </div>
+
+            <div class="zAxis" id="zAxisContainer">
+              <div class="generalZAxis hidden">
+                <label class="labelForGeneralZAxis">Z-Axis:</label>
+                <select class="generalZAxisDropdown" data-axis="z"></select>
+              </div>
+              <div class="specificZAxis hidden">
+                <label class="labelForSpecificZAxis">Z-Axis:</label>
+                <label class="labelForCropsForZAxis">Crop:</label>
+                <select
+                  class="cropsForZAxis"
+                  data-axis-type="crop"
+                  data-axis="z"
+                ></select>
+                <label class="labelForOtherColumnsForZAxis"
+                  >Specify a Value for the Crop:</label
+                >
+                <select
+                  class="otherColumnsForZAxis"
+                  data-axis-type="metric"
+                  data-axis="z"
+                ></select>
+              </div>
+            </div>
+
+            <button class="generate-btn">
+              <span class="btn-text">Generate</span>
+              <span class="loading-spinner hidden">Generating...</span>
+            </button>
+            <button class="prev-btn">Back</button>
           </div>
+
+          <!-- Step 4: Display Visualization -->
+          <div class="step4 hidden">
+            <h4>Generated Visualization:</h4>
+            <div class="plot-container"></div>
+            <div class="error-message hidden"></div>
+            <button class="prev-btn">Back</button>
+          </div>
+
+          <button class="remove-btn hidden">Remove Visualization</button>
         </div>
-        <div id="zAxis">
-          <div id="generalZAxis" class="hidden">
-            <label for="generalZAxis" id="labelForGeneralZAxis">Z-Axis:</label>
-            <select id="generalZAxisDropdown"></select>
-          </div>
-          <div id="specificZAxis" class="hidden">
-            <label for="specificZAxis" id="labelForSpecificZAxis">Z-Axis:</label>
-            <label for="cropsForZAxis" id="labelForCropsForZAxis">Crop:</label>
-            <select id="cropsForZAxis"></select>
-            <label for="otherColumnsForZAxis" id="labelForOtherColumnsForZAxis">Specify a Value for the Crop:</label>
-            <select id="otherColumnsForZAxis"></select>
-          </div>
-        </div>
-        <button onclick="generateVisualization()">Generate</button>
-        <button onclick="prevStep(2)">Back</button>
       </div>
+    </div>
 
-      <!-- Step 4: Display Visualization -->
-      <div id="step4" class="hidden">
-        <h4>Generated Visualization:</h4>
-        <div id="plot-container"></div>
-        <button onclick="prevStep(3)">Back</button>
-      </div>
+    <!-- "Add another" button container -->
+    <div id="add-another-container" class="hidden">
+      <button id="addAnotherVisualizationButton">
+        Add another visualization
+      </button>
     </div>
   </body>
 </html>

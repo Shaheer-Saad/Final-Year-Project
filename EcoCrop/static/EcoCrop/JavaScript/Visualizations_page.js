@@ -1,36 +1,40 @@
-// Ensure the first step is visible on page load
-document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("step1").classList.remove("hidden");
+// Initialize the page when DOM is loaded
+document.addEventListener("DOMContentLoaded", function() {
+    // Add first visualization
+    addAnotherVisualization();
+    
+    // Set up event listeners
+    document.getElementById('addAnotherVisualizationButton')?.addEventListener('click', addAnotherVisualization);
 });
 
-function nextStep(step) {
-    for (let i = 1; i <= 4; i++) {
-        let stepElement = document.getElementById("step" + i);
-        if (stepElement) {
-            stepElement.classList.add("hidden");
-        }
-    }
-    let nextStepElement = document.getElementById("step" + step);
-    if (nextStepElement) {
-        nextStepElement.classList.remove("hidden");
-    }
+// Helper function to get parent container
+function getContainer(element) {
+    return element?.closest(".Container") || document.querySelector(".Container");
 }
 
-function prevStep(step) {
+// Navigation functions
+function nextStep(button, step) {
+    const container = getContainer(button);
     for (let i = 1; i <= 4; i++) {
-        let stepElement = document.getElementById("step" + i);
-        if (stepElement) {
-            stepElement.classList.add("hidden");
-        }
+        const stepElement = container.querySelector(`.step${i}`);
+        if (stepElement) stepElement.classList.add("hidden");
     }
-    let prevStepElement = document.getElementById("step" + step);
-    if (prevStepElement) {
-        prevStepElement.classList.remove("hidden");
-    }
+    container.querySelector(`.step${step}`)?.classList.remove("hidden");
 }
 
-function fetchColumns() {
-    let selectedCategory = document.getElementById("category").value;
+function prevStep(button, step) {
+    const container = getContainer(button);
+    for (let i = 1; i <= 4; i++) {
+        const stepElement = container.querySelector(`.step${i}`);
+        if (stepElement) stepElement.classList.add("hidden");
+    }
+    container.querySelector(`.step${step}`)?.classList.remove("hidden");
+}
+
+// Fetch columns from server
+function fetchColumns(button) {
+    const container = getContainer(button);
+    const selectedCategory = container.querySelector('.category').value;
 
     if (!selectedCategory) {
         alert("Please select a category first.");
@@ -48,281 +52,320 @@ function fetchColumns() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            populateDropdown("xAxis", data.axes_values[0], selectedCategory);
-            populateDropdown("yAxis", data.axes_values[1], selectedCategory);
-            populateDropdown("zAxis", data.axes_values[2], selectedCategory);
-            
-            nextStep(2);  // Move to the next step only after fetching columns
+            populateDropdown(container, "xAxis", data.axes_values[0], selectedCategory);
+            populateDropdown(container, "yAxis", data.axes_values[1], selectedCategory);
+            populateDropdown(container, "zAxis", data.axes_values[2], selectedCategory);
+            nextStep(button, 2);
         } else {
-            alert("There was an error while communicating to the server!");
+            alert("Error fetching columns from server!");
         }
     })
     .catch(error => console.error("Error:", error));
 }
 
-function populateDropdown(dropdownId, options, category) {
-    let dropdown = document.getElementById(dropdownId);
+// Populate dropdown menus
+function populateDropdown(container, dropdownClass, options, category) {
+    const dropdown = container.querySelector(`.${dropdownClass}`);
 
-    if (["yAxis", "zAxis"].includes(dropdownId)) {
-        console.log('Current dropdown ID:', dropdownId)
+    if (["yAxis", "zAxis"].includes(dropdownClass)) {
         if (["Economy", "Economy with Climate Index"].includes(category)) {
-            document.getElementById("specific" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)).classList.remove("hidden");
-            let cropsDropdown = document.getElementById("cropsFor" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1));
-            let otherColumnsDropdown = document.getElementById("otherColumnsFor" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1));
-            cropsDropdown.innerHTML = '<option value="">Choose...</option>'; // Reset dropdown
-            options[0].forEach(option => {
-                let opt = document.createElement("option");
-                opt.value = option;
-                opt.textContent = option;
-                cropsDropdown.appendChild(opt);
-            });
-            cropsDropdown.addEventListener("change", function () {
-                filterDropdownOptions(dropdownId, category);
-            });
-            otherColumnsDropdown.innerHTML = '<option value="">Choose...</option>'; // Reset dropdown
-            options[1].forEach(option => {
-                let opt = document.createElement("option");
-                opt.value = option;
-                opt.textContent = option;
-                otherColumnsDropdown.appendChild(opt);
-            });
-            otherColumnsDropdown.addEventListener("change", function () {
-                filterDropdownOptions(dropdownId, category);
-            });
-        } else {
-            document.getElementById("general" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)).classList.remove("hidden");
-            let generalDropdown = document.getElementById("general" + dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1) + "Dropdown");
-            generalDropdown.innerHTML = '<option value="">Choose...</option>'; // Reset dropdown
-            options.forEach(option => {
-                let opt = document.createElement("option");
-                opt.value = option;
-                opt.textContent = option;
-                generalDropdown.appendChild(opt);
-            });
-            generalDropdown.addEventListener("change", function () {
-                filterDropdownOptions(dropdownId, category);
-            });
-        }
-    } else {
-        dropdown.innerHTML = '<option value="">Choose...</option>'; // Reset dropdown
-        options.forEach(option => {
-            let opt = document.createElement("option");
-            opt.value = option;
-            opt.textContent = option;
-            dropdown.appendChild(opt);
-        });
-        dropdown.addEventListener("change", function () {
-            filterDropdownOptions(dropdownId, category);
-        });
-    }
-}
+            container.querySelector(`.specific${dropdownClass.charAt(0).toUpperCase() + dropdownClass.slice(1)}`).classList.remove("hidden");
+            const cropsDropdown = container.querySelector(`.cropsFor${dropdownClass.charAt(0).toUpperCase() + dropdownClass.slice(1)}`);
+            const otherColumnsDropdown = container.querySelector(`.otherColumnsFor${dropdownClass.charAt(0).toUpperCase() + dropdownClass.slice(1)}`);
+            
+            resetAndPopulateDropdown(cropsDropdown, options[0]);
+            resetAndPopulateDropdown(otherColumnsDropdown, options[1]);
 
-// Show or hide the Z-axis dropdown based on the visualization type
-function toggleZAxisDropdown() {
-    let visualizationType = document.getElementById("visType").value;
-    if (!visualizationType) {
-        alert("Please select a type of visualization first.")
-        return
-    }
-    let zAxisDropdownContainer = document.getElementById("zAxis");
-    if (visualizationType !== "3d") {
-        zAxisDropdownContainer.style.display = "none"; // Hide the Z-axis dropdown
-        nextStep(3);
-    } else {
-        zAxisDropdownContainer.style.display = "block"; // Show the Z-axis dropdown
-        nextStep(3)
-    }
-}
-
-// Prevent duplicate selections across dropdowns
-function filterDropdownOptions(dropdownId, category) {
-    let selectedValues = new Set();
-
-    if (["yAxis", "zAxis"].includes(dropdownId)) {
-        if (["Economy", "Economy with Climate Index"].includes(category)) {
-            // Collect selected values from all dropdowns
-            ["otherColumnsForYAxis", "otherColumnsForZAxis"].forEach(id => {
-                let dropdown = document.getElementById(id);
-                if (dropdown && dropdown.value) {
-                    selectedValues.add(dropdown.value);
-                }
+            // Add event listeners for duplicate prevention
+            cropsDropdown.addEventListener("change", () => {
+                filterDropdownOptions(dropdownClass, category);
             });
-            console.log("Selected values:", selectedValues)
-
-            setTimeout(() => {}, 1000); // 2000ms = 2 seconds
-            // Update each dropdown to remove already-selected options
-            ["otherColumnsForYAxis", "otherColumnsForZAxis"].forEach(id => {
-                let dropdown = document.getElementById(id);// "otherColumnsForZAxis");
-                if (dropdown) {
-                    let options = [...dropdown.options];
-                    options.forEach(option => {
-                        console.log(option);
-                        if (document.getElementById("cropsForYAxis")?.value === document.getElementById("cropsForZAxis")?.value) {
-                            console.log("Crops are same.");
-                            if (option.value && selectedValues.has(option.value) && option.value !== dropdown.value) {
-                                option.hidden = true;
-                            } else {
-                                option.hidden = false;
-                            }
-                        } else {
-                            option.hidden = false;
-                        }
-                    });
-                }
-            });
-            // Collect selected values from all dropdowns
-            ["cropsForYAxis", "cropsForZAxis"].forEach(id => {
-                let dropdown = document.getElementById(id);
-                if (dropdown && dropdown.value) {
-                    selectedValues.add(dropdown.value);
-                }
-            });
-            console.log("Selected values:", selectedValues)
-
-            setTimeout(() => {}, 1000); // 2000ms = 2 seconds
-            // Update each dropdown to remove already-selected options
-            ["cropsForYAxis", "cropsForZAxis"].forEach(id => {
-                let dropdown = document.getElementById(id);// "otherColumnsForZAxis");
-                if (dropdown) {
-                    let options = [...dropdown.options];
-                    options.forEach(option => {
-                        console.log(option);
-                        if (document.getElementById("otherColumnsForYAxis")?.value === document.getElementById("otherColumnsForZAxis")?.value) {
-                            console.log("Specified values are same.");
-                            if (option.value && selectedValues.has(option.value) && option.value !== dropdown.value) {
-                                option.hidden = true;
-                            } else {
-                                option.hidden = false;
-                            }
-                        } else {
-                            option.hidden = false;
-                        }
-                    });
-                }
-            });
-        } else {
-            // Collect selected values from all dropdowns
-            ["generalYAxisDropdown", "generalZAxisDropdown"].forEach(id => {
-                let dropdown = document.getElementById(id);
-                if (dropdown && dropdown.value) {
-                    selectedValues.add(dropdown.value);
-                }
+            otherColumnsDropdown.addEventListener("change", () => {
+                filterDropdownOptions(dropdownClass, category);
             });
             
-            // Update each dropdown to remove already-selected options
-            ["generalYAxisDropdown", "generalZAxisDropdown"].forEach(id => {
-                let dropdown = document.getElementById(id);
-                if (dropdown) {
-                    let options = [...dropdown.options];
-                    options.forEach(option => {
-                        if (option.value && selectedValues.has(option.value) && option.value !== dropdown.value) {
-                            option.hidden = true;
-                        } else {
-                            option.hidden = false;
-                        }
-                    });
-                }
-            });
-        }
-    }
-    // // Collect selected values from all dropdowns
-    // ["xAxis", "yAxis", "zAxis"].forEach(id => {
-    //     let dropdown = document.getElementById(id);
-    //     if (dropdown && dropdown.value) {
-    //         selectedValues.add(dropdown.value);
-    //     }
-    // });
+            // Initial filtering
+            filterDropdownOptions(dropdownClass, category);
+        } else {
+            container.querySelector(`.general${dropdownClass.charAt(0).toUpperCase() + dropdownClass.slice(1)}`).classList.remove("hidden");
+            const generalDropdown = container.querySelector(`.general${dropdownClass.charAt(0).toUpperCase() + dropdownClass.slice(1)}Dropdown`);
+            resetAndPopulateDropdown(generalDropdown, options);
 
-    // // Update each dropdown to remove already-selected options
-    // ["xAxis", "yAxis", "zAxis"].forEach(id => {
-    //     let dropdown = document.getElementById(id);
-    //     if (dropdown) {
-    //         let options = [...dropdown.options];
-    //         options.forEach(option => {
-    //             if (option.value && selectedValues.has(option.value) && option.value !== dropdown.value) {
-    //                 option.hidden = true;
-    //             } else {
-    //                 option.hidden = false;
-    //             }
-    //         });
-    //     }
-    // });
+            // Add event listener for duplicate prevention
+            generalDropdown.addEventListener("change", () => {
+                filterDropdownOptions(dropdownClass, category);
+            });
+            
+            // Initial filtering
+            filterDropdownOptions(dropdownClass, category);
+        }
+    } else {
+        resetAndPopulateDropdown(dropdown, options);
+    }
 }
 
-function generateVisualization() {
-    const category = document.getElementById('category').value;
-    const visType = document.getElementById('visType').value;
+
+
+function resetAndPopulateDropdown(dropdown, options) {
+    if (!dropdown) return;
+    dropdown.innerHTML = '<option value="">Choose...</option>';
+    options?.forEach(option => {
+        const opt = document.createElement("option");
+        opt.value = option;
+        opt.textContent = option;
+        dropdown.appendChild(opt);
+    });
+}
+
+// Toggle Z-axis visibility
+function toggleZAxisDropdown(button) {
+    const container = getContainer(button);
+    const visualizationType = container.querySelector('.visType').value;
+    if (!visualizationType) {
+        alert("Please select a visualization type first.");
+        return;
+    }
+    
+    const zAxisContainer = container.querySelector('.zAxis');
+    if (visualizationType !== "3d") {
+        zAxisContainer.style.display = "none";
+    } else {
+        zAxisContainer.style.display = "block";
+    }
+    nextStep(button, 3);
+}
+
+function filterDropdownOptions(dropdownId, category) {
+    const container = document.querySelector(".Container:not(.hidden)") || document.querySelector(".Container");
+    if (!container) {
+        console.error("Container element not found");
+        return;
+    }
+
+    if (["yAxis", "zAxis"].includes(dropdownId)) {
+        if (["Economy", "Economy with Climate Index"].includes(category)) {
+            // Get all relevant dropdown elements
+            const cropsY = container.querySelector(".cropsForYAxis");
+            const cropsZ = container.querySelector(".cropsForZAxis");
+            const otherY = container.querySelector(".otherColumnsForYAxis");
+            const otherZ = container.querySelector(".otherColumnsForZAxis");
+
+            // Get current values
+            const currentCropY = cropsY?.value;
+            const currentCropZ = cropsZ?.value;
+            const currentOtherY = otherY?.value;
+            const currentOtherZ = otherZ?.value;
+
+            // Prevent duplicate crop selections
+            if (dropdownId === "yAxis" && currentCropY && currentCropY === currentCropZ) {
+                alert("Cannot select the same crop for both Y and Z axes");
+                cropsY.value = "";
+                return;
+            }
+            if (dropdownId === "zAxis" && currentCropZ && currentCropZ === currentCropY) {
+                alert("Cannot select the same crop for both Y and Z axes");
+                cropsZ.value = "";
+                return;
+            }
+
+            // Prevent duplicate metric selections when crops are same
+            if (currentCropY && currentCropY === currentCropZ && 
+                currentOtherY && currentOtherY === currentOtherZ) {
+                alert("Cannot select the same metric for both axes when crops are identical");
+                if (dropdownId === "yAxis") otherY.value = "";
+                if (dropdownId === "zAxis") otherZ.value = "";
+                return;
+            }
+
+            // Filter options in otherColumns dropdowns
+            if (otherY && otherZ) {
+                const otherOptionsY = Array.from(otherY.options);
+                const otherOptionsZ = Array.from(otherZ.options);
+
+                otherOptionsY.forEach(option => {
+                    option.hidden = currentOtherZ && option.value === currentOtherZ && option.value !== otherY.value;
+                });
+
+                otherOptionsZ.forEach(option => {
+                    option.hidden = currentOtherY && option.value === currentOtherY && option.value !== otherZ.value;
+                });
+            }
+
+        } else {
+            // Handle general case (non-Economy categories)
+            const generalY = container.querySelector(".generalYAxisDropdown");
+            const generalZ = container.querySelector(".generalZAxisDropdown");
+
+            const currentGeneralY = generalY?.value;
+            const currentGeneralZ = generalZ?.value;
+
+            // Prevent duplicate selections in general case
+            if (dropdownId === "yAxis" && currentGeneralY && currentGeneralY === currentGeneralZ) {
+                alert("Cannot select the same value for both Y and Z axes");
+                generalY.value = "";
+                return;
+            }
+            if (dropdownId === "zAxis" && currentGeneralZ && currentGeneralZ === currentGeneralY) {
+                alert("Cannot select the same value for both Y and Z axes");
+                generalZ.value = "";
+                return;
+            }
+
+            // Filter options in general dropdowns
+            if (generalY && generalZ) {
+                const generalOptionsY = Array.from(generalY.options);
+                const generalOptionsZ = Array.from(generalZ.options);
+
+                generalOptionsY.forEach(option => {
+                    option.hidden = currentGeneralZ && option.value === currentGeneralZ && option.value !== generalY.value;
+                });
+
+                generalOptionsZ.forEach(option => {
+                    option.hidden = currentGeneralY && option.value === currentGeneralY && option.value !== generalZ.value;
+                });
+            }
+        }
+    }
+}
+
+// Generate visualization
+function generateVisualization(button) {
+    const container = getContainer(button);
+    const category = container.querySelector('.category').value;
+    const visType = container.querySelector('.visType').value;
+    const xAxis = container.querySelector('.xAxis').value;
+
+    if (!xAxis) {
+        alert("Please select all required options.");
+        return;
+    }
 
     let requestData = {};
     
     if (visType === "3d") {
-        const xAxis = document.getElementById('xAxis').value;
-        const yAxis = document.getElementById('yAxis').value;
-        const zAxis = document.getElementById('zAxis').value;
+        if (["Economy", "Economy with Climate Index"].includes(category)) {
+            const cropForYAxis = container.querySelector('.cropsForYAxis').value;
+            const otherColumnForYAxis = container.querySelector('.otherColumnsForYAxis').value;
+            const cropForZAxis = container.querySelector('.cropsForZAxis').value;
+            const otherColumnForZAxis = container.querySelector('.otherColumnsForZAxis').value;
+            
+            if (!cropForYAxis || !otherColumnForYAxis || !cropForZAxis || !otherColumnForZAxis) {
+                alert("Please select all required options.");
+                return;
+            }
+            
+            requestData = {
+                category: category,
+                visType: visType,
+                xAxis: xAxis,
+                cropForYAxis: cropForYAxis,
+                otherColumnForYAxis: otherColumnForYAxis,
+                cropForZAxis: cropForZAxis,
+                otherColumnForZAxis: otherColumnForZAxis
+            };
+        } else {
+            const generalYAxis = container.querySelector('.generalYAxisDropdown').value;
+            const generalZAxis = container.querySelector('.generalZAxisDropdown').value;
+            
+            if (!generalYAxis || !generalZAxis) {
+                alert("Please select all required options.");
+                return;
+            }
 
-        // Ensure all fields are selected
-        if (!category || !visType || !xAxis || !yAxis || !zAxis) {
-            alert("Please select all options before generating visualization.");
-            return;
+            requestData = {
+                category: category,
+                visType: visType,
+                xAxis: xAxis,
+                generalYAxis: generalYAxis,
+                generalZAxis: generalZAxis
+            };
         }
-
-        requestData = {
-            category: category,
-            visType: visType,
-            xAxis: xAxis,
-            yAxis: yAxis,
-            zAxis: zAxis
-        };
     } else {
-        const xAxis = document.getElementById('xAxis').value;
-        const yAxis = document.getElementById('yAxis').value;
+        if (["Economy", "Economy with Climate Index"].includes(category)) {
+            const cropForYAxis = container.querySelector('.cropsForYAxis').value;
+            const otherColumnForYAxis = container.querySelector('.otherColumnsForYAxis').value;
 
-        // Ensure all fields are selected
-        if (!category || !visType || !xAxis || !yAxis) {
-            alert("Please select all options before generating visualization.");
-            return;
+            if (!cropForYAxis || !otherColumnForYAxis) {
+                alert("Please select all required options.");
+                return;
+            }
+            
+            requestData = {
+                category: category,
+                visType: visType,
+                xAxis: xAxis,
+                cropForYAxis: cropForYAxis,
+                otherColumnForYAxis: otherColumnForYAxis
+            };
+        } else {
+            const generalYAxis = container.querySelector('.generalYAxisDropdown').value;
+            
+            if (!generalYAxis) {
+                alert("Please select all required options.");
+                return;
+            }
+
+            requestData = {
+                category: category,
+                visType: visType,
+                xAxis: xAxis,
+                generalYAxis: generalYAxis
+            };
         }
-
-        requestData = {
-            category: category,
-            visType: visType,
-            xAxis: xAxis,
-            yAxis: yAxis
-        };
     }
 
-    // Debugging: Print the data before sending
-    console.log("Sending Data:", JSON.stringify(requestData));
-    
+    // Show loading state
+    const generateBtn = container.querySelector('.generate-btn');
+    const originalBtnText = generateBtn.textContent;
+    generateBtn.textContent = "Generating...";
+    generateBtn.disabled = true;
+
     fetch("API/Generate_plot", {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken() // Ensure CSRF protection
+            'X-CSRFToken': getCSRFToken()
         },
         body: JSON.stringify(requestData)
     })
     .then(response => response.json())
     .then(data => {
-        console.log("Received Data:", JSON.stringify(data));
-        console.log("Plot HTML:", data.plot_html);
+        generateBtn.textContent = originalBtnText;
+        generateBtn.disabled = false;
+        
         if (data.success) {
-            document.getElementById('step4').classList.remove('hidden');
-            document.getElementById('plot-container').innerHTML = data.plot_html;
+            container.querySelector('.step4').classList.remove('hidden');
+            container.querySelector('.plot-container').innerHTML = data.plot_html;
 
-        // Extract and execute script tags
-        const scripts = document.getElementById('plot-container').getElementsByTagName('script');
-        for (let i = 0; i < scripts.length; i++) {
-            eval(scripts[i].innerText);  // Run the script content
-        }
+            // Execute any scripts in the plot HTML
+            const scripts = container.querySelector('.plot-container').getElementsByTagName('script');
+            for (let i = 0; i < scripts.length; i++) {
+                try {
+                    eval(scripts[i].innerText);
+                } catch (e) {
+                    console.error("Error executing plot script:", e);
+                }
+            }
+            
+            container.querySelector(".remove-btn").classList.remove("hidden");
+            
+            // Show the "Add another" button after successful generation
+            document.getElementById("add-another-container").classList.remove("hidden");
+            
+            nextStep(button, 4);
         } else {
-            alert("Error generating visualization.");
+            alert("Error generating visualization: " + (data.message || "Unknown error"));
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        generateBtn.textContent = originalBtnText;
+        generateBtn.disabled = false;
+        alert("Network error occurred. Please try again.");
+    });
 }
 
-// Function to get CSRF token from cookies (needed for Django's security)
+// Get CSRF token for Django
 function getCSRFToken() {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -336,4 +379,139 @@ function getCSRFToken() {
         }
     }
     return cookieValue;
+}
+
+// Remove visualization
+function removeVisualization(button) {
+    const wrapper = button.closest('.visualization-wrapper');
+    if (wrapper) {
+        wrapper.remove();
+    }
+}
+
+// Add new visualization
+function addAnotherVisualization() {
+    const visualizationsContainer = document.getElementById("visualizations-container");
+    const template = document.getElementById("visualization-template");
+    
+    if (!visualizationsContainer || !template) return;
+    
+    // Clone the template
+    const newVisualization = template.cloneNode(true);
+    newVisualization.classList.remove("hidden");
+    newVisualization.removeAttribute("id");
+    
+    // Reset the new visualization
+    const container = newVisualization.querySelector(".Container");
+    if (container) {
+        // Show only step 1
+        container.querySelector('.step1').classList.remove("hidden");
+        for (let i = 2; i <= 4; i++) {
+            const step = container.querySelector(`.step${i}`);
+            if (step) step.classList.add("hidden");
+        }
+        
+        // Reset all inputs
+        container.querySelectorAll('select').forEach(select => {
+            select.value = "";
+        });
+        
+        // Clear plot container
+        const plotContainer = container.querySelector('.plot-container');
+        if (plotContainer) plotContainer.innerHTML = "";
+        
+        // Hide remove button
+        const removeBtn = container.querySelector('.remove-btn');
+        if (removeBtn) removeBtn.classList.add("hidden");
+        
+        // Set up event listeners for this container
+        setupContainerEventListeners(container);
+    }
+    
+    // Add to container
+    visualizationsContainer.appendChild(newVisualization);
+    
+    // Hide "Add another" button until this one is generated
+    document.getElementById("add-another-container").classList.add("hidden");
+    
+    // Scroll to the new visualization
+    newVisualization.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Set up event listeners for a container
+function setupContainerEventListeners(container) {
+    if (!container) return;
+    
+    // Next buttons
+    container.querySelector('.step1 .next-btn')?.addEventListener('click', function() {
+        fetchColumns(this);
+    });
+    
+    container.querySelector('.step2 .next-btn')?.addEventListener('click', function() {
+        toggleZAxisDropdown(this);
+    });
+    
+    // Generate button
+    container.querySelector('.step3 .generate-btn')?.addEventListener('click', function() {
+        generateVisualization(this);
+    });
+    
+    // Back buttons
+    container.querySelectorAll('.prev-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const step = this.classList.contains('step2-prev') ? 1 : 
+                         this.classList.contains('step3-prev') ? 2 : 
+                         this.classList.contains('step4-prev') ? 3 : 1;
+            prevStep(this, step);
+        });
+    });
+    
+    // Dashboard button
+    container.querySelector('.dashboard-btn')?.addEventListener('click', function() {
+    const url = this.getAttribute('data-dashboard-url');
+    if (url) {
+        window.location.href = url;
+    } else {
+        console.error("Dashboard URL not found");
+    }
+});
+    
+    // Remove button
+    container.querySelector('.remove-btn')?.addEventListener('click', function() {
+        removeVisualization(this);
+    });
+
+    container.querySelector('.visType')?.addEventListener('change', function() {
+        const zAxisContainer = container.querySelector('.zAxis');
+        if (zAxisContainer) {
+            zAxisContainer.style.display = this.value === "3d" ? "block" : "none";
+            
+            // When switching to 2D, clear Z-axis values and reapply filtering
+            if (this.value !== "3d") {
+                const category = container.querySelector('.category')?.value;
+                if (category) {
+                    const zAxisDropdowns = [
+                        container.querySelector('.cropsForZAxis'),
+                        container.querySelector('.otherColumnsForZAxis'),
+                        container.querySelector('.generalZAxisDropdown')
+                    ];
+                    
+                    zAxisDropdowns.forEach(dropdown => {
+                        if (dropdown) dropdown.value = "";
+                    });
+                    
+                    // Re-filter Y-axis options
+                    filterDropdownOptions("yAxis", category);
+                }
+            }
+        }
+    });
+
+    // Add change listener for category to reset dependent fields
+    container.querySelector('.category')?.addEventListener('change', function() {
+        // Reset dependent fields when category changes
+        container.querySelectorAll('.yAxis select, .zAxis select').forEach(select => {
+            select.value = "";
+        });
+    });
 }
