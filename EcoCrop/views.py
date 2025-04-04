@@ -1,9 +1,11 @@
 from django.shortcuts import render
 import os
+from django.conf import settings
 from .metadata_about_dataset import dictionary_of_dataframes, dictionary_of_columns, get_name
 import plotly.express as px
 from django.http import HttpRequest, JsonResponse
 from rest_framework.decorators import api_view
+import pickle
 
 # print("Looking for file in:", os.getcwd())
 
@@ -107,12 +109,13 @@ def generate_plot(request):
                 y_metadata = sheet.get(other_column_for_y_axis, {"unit": "", "scale": ""})
                 z_metadata = sheet.get(other_column_for_z_axis, {"unit": "", "scale": ""})
                 x_label = f"{x_axis}".strip()
-                y_label = f"{other_column_for_y_axis} ({y_metadata['scale']} {y_metadata['unit']})".strip()
-                z_label = f"{other_column_for_z_axis} ({z_metadata['scale']} {z_metadata['unit']})".strip()
+                y_label = f"{other_column_for_y_axis} - {crop_for_y_axis}<br>({y_metadata['scale']} {y_metadata['unit']})".strip()
+                z_label = f"{other_column_for_z_axis} - {crop_for_z_axis}<br>({z_metadata['scale']} {z_metadata['unit']})".strip()
 
                 x_indices = list(range(len(x_values)))
 
-                fig = px.scatter_3d(x=x_indices, y=y_values, z=z_values, title=f"{category} - 3D Plot")
+                fig = px.scatter_3d(x=x_indices, y=y_values, z=z_values, title=f"{category} - 3D Plot", height = 800)
+                
                 fig.update_xaxes(type="category")
                 fig.update_layout(
                     scene=dict(
@@ -122,8 +125,13 @@ def generate_plot(request):
                             ticktext=x_values,  # Show actual category labels
                         ),
                         yaxis_title=y_label,
-                        zaxis_title=z_label
-                    )
+                        zaxis_title=z_label,
+                        camera=dict(
+                            eye=dict(x=1.5, y=1.5, z=1.5)  # Change these values to adjust viewpoint
+                        ),
+                    ),
+                    margin=dict(l=0, r=0, b=0, t=50),  # Maximize plot area
+                    autosize=True
                 )
             else:
                 column_for_x_axis = sheet[x_axis]["name"]
@@ -132,8 +140,24 @@ def generate_plot(request):
                 x_values = df[column_for_x_axis]
                 y_values = df[column_for_y_axis]
                 z_values = df[column_for_z_axis]
+                x_label = f"{x_axis}".strip()
+                y_label = f"{general_y_axis}".strip()
+                z_label = f"{general_z_axis}".strip()
                 
-                fig = px.scatter_3d(x=x_values, y=y_values, z=z_values, title=f"{category} - 3D Plot")
+                fig = px.scatter_3d(x=x_values, y=y_values, z=z_values, title=f"{category} - 3D Plot", width = 1000, height = 800)
+
+                fig.update_layout(
+                    scene=dict(
+                        xaxis_title=x_label,
+                        yaxis_title=y_label,
+                        zaxis_title=z_label,
+                        camera=dict(
+                            eye=dict(x=1.5, y=1.5, z=1.5)  # Change these values to adjust viewpoint
+                        ),
+                    ),
+                    margin=dict(l=0, r=0, b=0, t=50),  # Maximize plot area
+                    autosize=True
+                )
         else:
             if category in ["Economy", "Economy with Climate Index"]:
                 column_for_x_axis = sheet[x_axis]["name"]
@@ -141,29 +165,45 @@ def generate_plot(request):
                 x_values = df[df["Crop"] == crop_for_y_axis][column_for_x_axis]
                 print(x_values)
                 y_values = df[df["Crop"] == crop_for_y_axis][column_for_y_axis]
+                y_metadata = sheet.get(other_column_for_y_axis, {"unit": "", "scale": ""})
+                x_label = f"{x_axis}".strip()
+                y_label = f"{other_column_for_y_axis} ({y_metadata['scale']} {y_metadata['unit']})".strip()
+
+                x_indices = list(range(len(x_values)))
+                print(x_indices)
 
                 if visualization_type == "bar":
-                    fig = px.bar(x=x_values, y=y_values, title=f"{category} - Bar Chart")
+                    fig = px.bar(x=x_indices, y=y_values, title=f"{category} - Bar Chart", labels={"x": x_label, "y": y_label})
                 elif visualization_type == "line":
-                    fig = px.line(x=x_values, y=y_values, title=f"{category} - Line Chart")
+                    fig = px.line(x=x_indices, y=y_values, title=f"{category} - Line Chart", labels={"x": x_label, "y": y_label})
                 elif visualization_type == "scatter":
-                    fig = px.scatter(x=x_values, y=y_values, title=f"{category} - Scatter Plot")
+                    fig = px.scatter(x=x_indices, y=y_values, title=f"{category} - Scatter Plot", labels={"x": x_label, "y": y_label})
                 elif visualization_type == "histogram":
-                    fig = px.histogram(x=x_values, y=y_values, title=f"{category} - Histogram")
+                    fig = px.histogram(x=x_indices, y=y_values, title=f"{category} - Histogram", labels={"x": x_label, "y": y_label})
+
+                fig.update_xaxes(
+                        type='category',  # Treat x-values as categories
+                        tickangle=-45,    # Rotate labels if needed
+                        tickmode='array',  # Use explicit tick values
+                        tickvals=x_indices, # Use the actual x values as positions
+                        ticktext=x_values # Same values as labels
+                    )
             else:
                 column_for_x_axis = sheet[x_axis]["name"]
                 column_for_y_axis = sheet[general_y_axis]["name"]
                 x_values = df[column_for_x_axis]
                 y_values = df[column_for_y_axis]
+                x_label = f"{x_axis}".strip()
+                y_label = f"{general_y_axis}".strip()
 
                 if visualization_type == "bar":
-                    fig = px.bar(x=x_values, y=y_values, title=f"{category} - Bar Chart")
+                    fig = px.bar(x=x_values, y=y_values, title=f"{category} - Bar Chart", labels={"x": x_label, "y": y_label})
                 elif visualization_type == "line":
-                    fig = px.line(x=x_values, y=y_values, title=f"{category} - Line Chart")
+                    fig = px.line(x=x_values, y=y_values, title=f"{category} - Line Chart", labels={"x": x_label, "y": y_label})
                 elif visualization_type == "scatter":
-                    fig = px.scatter(x=x_values, y=y_values, title=f"{category} - Scatter Plot")
+                    fig = px.scatter(x=x_values, y=y_values, title=f"{category} - Scatter Plot", labels={"x": x_label, "y": y_label})
                 elif visualization_type == "histogram":
-                    fig = px.histogram(x=x_values, y=y_values, title=f"{category} - Histogram")
+                    fig = px.histogram(x=x_values, y=y_values, title=f"{category} - Histogram", labels={"x": x_label, "y": y_label})
 
         # Convert plotly figure to HTML
         fig.update_xaxes(type="category")
@@ -174,3 +214,11 @@ def generate_plot(request):
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)})
+
+def get_predictions():
+    model_path = os.path.join(settings.BASE_DIR, 'EcoCrop', 'pickle_files', 'import_export', 'apple_export_model.pkl')
+    print(model_path)
+    with open(model_path, 'rb') as file:
+        model = pickle.load(file)
+
+get_predictions()

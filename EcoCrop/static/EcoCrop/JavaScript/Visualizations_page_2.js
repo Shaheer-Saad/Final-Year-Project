@@ -162,6 +162,7 @@ function filterDropdownOptions(dropdownId, category) {
             });
 
             setTimeout(() => {}, 1000); // 2000ms = 2 seconds
+            
             // Update each dropdown to remove already-selected options
             ["otherColumnsForYAxis", "otherColumnsForZAxis"].forEach(id => {
                 let dropdown = document.getElementById(id);// "otherColumnsForZAxis");
@@ -189,10 +190,10 @@ function filterDropdownOptions(dropdownId, category) {
             });
 
             setTimeout(() => {}, 1000); // 2000ms = 2 seconds
-            // Update each dropdown to remove already-selected options
             
+            // Update each dropdown to remove already-selected options            
             ["cropsForYAxis", "cropsForZAxis"].forEach(id => {
-                let dropdown = document.getElementById(id);// "otherColumnsForZAxis");
+                let dropdown = document.getElementById(id);
                 if (dropdown) {
                     let options = [...dropdown.options];
                     options.forEach(option => {

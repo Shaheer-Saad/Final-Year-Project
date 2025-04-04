@@ -78,10 +78,10 @@ function populateDropdown(container, dropdownClass, options, category) {
 
             // Add event listeners for duplicate prevention
             cropsDropdown.addEventListener("change", () => {
-                filterDropdownOptions(dropdownClass, category);
+                filterDropdownOptions(dropdownClass, category, container);
             });
             otherColumnsDropdown.addEventListener("change", () => {
-                filterDropdownOptions(dropdownClass, category);
+                filterDropdownOptions(dropdownClass, category, container);
             });
             
             // Initial filtering
@@ -93,18 +93,16 @@ function populateDropdown(container, dropdownClass, options, category) {
 
             // Add event listener for duplicate prevention
             generalDropdown.addEventListener("change", () => {
-                filterDropdownOptions(dropdownClass, category);
+                filterDropdownOptions(dropdownClass, category, container);
             });
             
             // Initial filtering
-            filterDropdownOptions(dropdownClass, category);
+            filterDropdownOptions(dropdownClass, category, container);
         }
     } else {
         resetAndPopulateDropdown(dropdown, options);
     }
 }
-
-
 
 function resetAndPopulateDropdown(dropdown, options) {
     if (!dropdown) return;
@@ -115,6 +113,7 @@ function resetAndPopulateDropdown(dropdown, options) {
         opt.textContent = option;
         dropdown.appendChild(opt);
     });
+    return
 }
 
 // Toggle Z-axis visibility
@@ -135,95 +134,87 @@ function toggleZAxisDropdown(button) {
     nextStep(button, 3);
 }
 
-function filterDropdownOptions(dropdownId, category) {
-    const container = document.querySelector(".Container:not(.hidden)") || document.querySelector(".Container");
+function filterDropdownOptions(dropdownId, category, container) {
     if (!container) {
         console.error("Container element not found");
         return;
     }
 
+    let selectedValues = new Set();
+
     if (["yAxis", "zAxis"].includes(dropdownId)) {
         if (["Economy", "Economy with Climate Index"].includes(category)) {
-            // Get all relevant dropdown elements
-            const cropsY = container.querySelector(".cropsForYAxis");
-            const cropsZ = container.querySelector(".cropsForZAxis");
-            const otherY = container.querySelector(".otherColumnsForYAxis");
-            const otherZ = container.querySelector(".otherColumnsForZAxis");
+            // Collect selected values from all dropdowns (container-scoped)
+            [".otherColumnsForYAxis", ".otherColumnsForZAxis"].forEach(selector => {
+                let dropdown = container.querySelector(selector);
+                if (dropdown && dropdown.value) {
+                    selectedValues.add(dropdown.value);
+                }
+            });
 
-            // Get current values
-            const currentCropY = cropsY?.value;
-            const currentCropZ = cropsZ?.value;
-            const currentOtherY = otherY?.value;
-            const currentOtherZ = otherZ?.value;
+            // Update each dropdown to remove already-selected options (container-scoped)
+            [".otherColumnsForYAxis", ".otherColumnsForZAxis"].forEach(selector => {
+                let dropdown = container.querySelector(selector);
+                if (dropdown) {
+                    let options = [...dropdown.options];
+                    const cropsY = container.querySelector(".cropsForYAxis");
+                    const cropsZ = container.querySelector(".cropsForZAxis");
+                    
+                    options.forEach(option => {
+                        if (cropsY && cropsZ && cropsY.value === cropsZ.value) {
+                            option.hidden = option.value && selectedValues.has(option.value) && option.value !== dropdown.value;
+                        } else {
+                            option.hidden = false;
+                        }
+                    });
+                }
+            });
 
-            // Prevent duplicate crop selections
-            if (dropdownId === "yAxis" && currentCropY && currentCropY === currentCropZ) {
-                alert("Cannot select the same crop for both Y and Z axes");
-                cropsY.value = "";
-                return;
-            }
-            if (dropdownId === "zAxis" && currentCropZ && currentCropZ === currentCropY) {
-                alert("Cannot select the same crop for both Y and Z axes");
-                cropsZ.value = "";
-                return;
-            }
+            // Reset and collect crop values
+            selectedValues = new Set();
+            [".cropsForYAxis", ".cropsForZAxis"].forEach(selector => {
+                let dropdown = container.querySelector(selector);
+                if (dropdown && dropdown.value) {
+                    selectedValues.add(dropdown.value);
+                }
+            });
 
-            // Prevent duplicate metric selections when crops are same
-            if (currentCropY && currentCropY === currentCropZ && 
-                currentOtherY && currentOtherY === currentOtherZ) {
-                alert("Cannot select the same metric for both axes when crops are identical");
-                if (dropdownId === "yAxis") otherY.value = "";
-                if (dropdownId === "zAxis") otherZ.value = "";
-                return;
-            }
-
-            // Filter options in otherColumns dropdowns
-            if (otherY && otherZ) {
-                const otherOptionsY = Array.from(otherY.options);
-                const otherOptionsZ = Array.from(otherZ.options);
-
-                otherOptionsY.forEach(option => {
-                    option.hidden = currentOtherZ && option.value === currentOtherZ && option.value !== otherY.value;
-                });
-
-                otherOptionsZ.forEach(option => {
-                    option.hidden = currentOtherY && option.value === currentOtherY && option.value !== otherZ.value;
-                });
-            }
-
+            // Update crop dropdowns (container-scoped)
+            [".cropsForYAxis", ".cropsForZAxis"].forEach(selector => {
+                let dropdown = container.querySelector(selector);
+                if (dropdown) {
+                    let options = [...dropdown.options];
+                    const otherY = container.querySelector(".otherColumnsForYAxis");
+                    const otherZ = container.querySelector(".otherColumnsForZAxis");
+                    
+                    options.forEach(option => {
+                        if (otherY && otherZ && otherY.value === otherZ.value) {
+                            option.hidden = option.value && selectedValues.has(option.value) && option.value !== dropdown.value;
+                        } else {
+                            option.hidden = false;
+                        }
+                    });
+                }
+            });
         } else {
-            // Handle general case (non-Economy categories)
-            const generalY = container.querySelector(".generalYAxisDropdown");
-            const generalZ = container.querySelector(".generalZAxisDropdown");
+            // General category handling (container-scoped)
+            selectedValues = new Set();
+            [".generalYAxisDropdown", ".generalZAxisDropdown"].forEach(selector => {
+                let dropdown = container.querySelector(selector);
+                if (dropdown && dropdown.value) {
+                    selectedValues.add(dropdown.value);
+                }
+            });
 
-            const currentGeneralY = generalY?.value;
-            const currentGeneralZ = generalZ?.value;
-
-            // Prevent duplicate selections in general case
-            if (dropdownId === "yAxis" && currentGeneralY && currentGeneralY === currentGeneralZ) {
-                alert("Cannot select the same value for both Y and Z axes");
-                generalY.value = "";
-                return;
-            }
-            if (dropdownId === "zAxis" && currentGeneralZ && currentGeneralZ === currentGeneralY) {
-                alert("Cannot select the same value for both Y and Z axes");
-                generalZ.value = "";
-                return;
-            }
-
-            // Filter options in general dropdowns
-            if (generalY && generalZ) {
-                const generalOptionsY = Array.from(generalY.options);
-                const generalOptionsZ = Array.from(generalZ.options);
-
-                generalOptionsY.forEach(option => {
-                    option.hidden = currentGeneralZ && option.value === currentGeneralZ && option.value !== generalY.value;
-                });
-
-                generalOptionsZ.forEach(option => {
-                    option.hidden = currentGeneralY && option.value === currentGeneralY && option.value !== generalZ.value;
-                });
-            }
+            [".generalYAxisDropdown", ".generalZAxisDropdown"].forEach(selector => {
+                let dropdown = container.querySelector(selector);
+                if (dropdown) {
+                    let options = [...dropdown.options];
+                    options.forEach(option => {
+                        option.hidden = option.value && selectedValues.has(option.value) && option.value !== dropdown.value;
+                    });
+                }
+            });
         }
     }
 }
@@ -459,6 +450,18 @@ function setupContainerEventListeners(container) {
     // Back buttons
     container.querySelectorAll('.prev-btn').forEach(btn => {
         btn.addEventListener('click', function() {
+            const container = getContainer(this);
+            const specificYAxisContainer = container.querySelector('.specificYAxis');
+            specificYAxisContainer.classList.add("hidden");
+            const specificZAxisContainer = container.querySelector('.specificZAxis');
+            specificZAxisContainer.classList.add("hidden");
+            const generalYAxisContainer = container.querySelector('.generalYAxis');
+            generalYAxisContainer.classList.add("hidden");
+            const generalZAxisContainer = container.querySelector('.generalZAxis');
+            generalZAxisContainer.classList.add("hidden");
+            const generateBtn = container.querySelector('.generate-btn');
+            generateBtn.textContent = "Generate";
+            generateBtn.disabled = false;
             const step = this.classList.contains('step2-prev') ? 1 : 
                          this.classList.contains('step3-prev') ? 2 : 
                          this.classList.contains('step4-prev') ? 3 : 1;
@@ -474,39 +477,13 @@ function setupContainerEventListeners(container) {
     } else {
         console.error("Dashboard URL not found");
     }
-});
+    });
     
     // Remove button
     container.querySelector('.remove-btn')?.addEventListener('click', function() {
         removeVisualization(this);
     });
-
-    container.querySelector('.visType')?.addEventListener('change', function() {
-        const zAxisContainer = container.querySelector('.zAxis');
-        if (zAxisContainer) {
-            zAxisContainer.style.display = this.value === "3d" ? "block" : "none";
-            
-            // When switching to 2D, clear Z-axis values and reapply filtering
-            if (this.value !== "3d") {
-                const category = container.querySelector('.category')?.value;
-                if (category) {
-                    const zAxisDropdowns = [
-                        container.querySelector('.cropsForZAxis'),
-                        container.querySelector('.otherColumnsForZAxis'),
-                        container.querySelector('.generalZAxisDropdown')
-                    ];
-                    
-                    zAxisDropdowns.forEach(dropdown => {
-                        if (dropdown) dropdown.value = "";
-                    });
-                    
-                    // Re-filter Y-axis options
-                    filterDropdownOptions("yAxis", category);
-                }
-            }
-        }
-    });
-
+    
     // Add change listener for category to reset dependent fields
     container.querySelector('.category')?.addEventListener('change', function() {
         // Reset dependent fields when category changes

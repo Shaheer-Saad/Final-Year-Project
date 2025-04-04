@@ -40,14 +40,157 @@ button.active {
     display: none !important;
 }
 
-/* Form element styles */
+/* ================== */
+/* EXTRAORDINARY DROPDOWN STYLES */
+/* ================== */
+
 select {
     width: 100%;
-    padding: 8px 12px;
-    margin: 8px 0 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 14px 52px 14px 16px;
+    margin: 8px 0 20px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    background-color: white;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: 
+        linear-gradient(45deg, transparent 50%, #4CAF50 50%),
+        linear-gradient(135deg, #4CAF50 50%, transparent 50%);
+    background-position: 
+        calc(100% - 20px) center,
+        calc(100% - 15px) center;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    box-shadow: 
+        0 2px 4px rgba(0,0,0,0.05),
+        0 4px 12px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    z-index: 1;
+}
+
+select:focus {
+    outline: none;
+    border-color: rgba(76, 175, 80, 0.5);
+    box-shadow: 
+        0 4px 8px rgba(76, 175, 80, 0.1),
+        0 8px 24px rgba(76, 175, 80, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Custom dropdown arrow animation */
+select:hover {
+    background-image: 
+        linear-gradient(45deg, transparent 50%, #2E7D32 50%),
+        linear-gradient(135deg, #2E7D32 50%, transparent 50%);
+}
+
+/* Stylish dropdown options */
+select option {
+    padding: 12px 16px;
+    margin: 4px 0;
+    background: white;
+    color: #333;
     font-size: 14px;
+    transition: all 0.2s;
+    position: relative;
+}
+
+/* Hover effect for options */
+select option:hover {
+    background: linear-gradient(to right, #f5f5f5, white);
+    color: #2E7D32;
+    transform: translateX(4px);
+}
+
+/* Selected option style */
+select option:checked {
+    background: linear-gradient(to right, #E8F5E9, #C8E6C9);
+    color: #2E7D32;
+    font-weight: 600;
+}
+
+/* Group headers styling */
+optgroup {
+    font-style: normal;
+    font-weight: 600;
+    color: #555;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    margin-top: 8px;
+}
+
+/* First option styling */
+select option:first-child {
+    color: #888;
+    font-style: italic;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Dropdown "open" state simulation */
+select:focus option {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Floating label effect */
+.dropdown-container {
+    position: relative;
+    margin: 20px 0;
+}
+
+.dropdown-container label {
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: white;
+    padding: 0 8px;
+    font-size: 13px;
+    color: #4CAF50;
+    font-weight: 600;
+    z-index: 2;
+    transform-origin: left center;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+select:focus + label {
+    color: #2E7D32;
+    transform: translateY(-18px) scale(0.9);
+}
+
+/* Label styles to match the design */
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+/* Adjust the spacing for dropdown containers */
+.yAxis, .zAxis {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+/* Style adjustments for step containers */
+.step1, .step2, .step3, .step4 {
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 label {
@@ -127,7 +270,10 @@ button:disabled {
     border: 1px solid #eee;
     border-radius: 4px;
     background-color: #fafafa;
-    min-height: 300px;
+    /* margin: 0 auto; */      /* Horizontal centering */
+    /* display: flex; */      /* Enable flexbox */
+    /* justify-content: center; */ /* Horizontal center */
+    /* align-items: center; *//* Vertical center */
 }
 
 /* Specific dropdown container styles */
