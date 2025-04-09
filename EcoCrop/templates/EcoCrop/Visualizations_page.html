@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visualizations</title>
+    <title>EcoCrop - Visualizations</title>
     <link
       rel="stylesheet"
       href="{% static 'EcoCrop/CSS/Visualizations_page.css' %}"
@@ -33,35 +33,18 @@
                 <option value="">Choose...</option>
                 <option value="Climate">Climate</option>
                 <option value="Economy">Economy</option>
-                <option value="Economy with Climate Index">
-                  Economy with Climate Index
-                </option>
-                <option value="Production with Climate Index">
-                  Production with Climate Index
-                </option>
-                <option value="Yield with Climate Index">
-                  Yield with Climate Index
-                </option>
-                <option value="Production and Yield">
-                  Production and Yield
-                </option>
-                <option value="Cultivated Area and Production">
-                  Cultivated Area and Production
-                </option>
-                <option value="Cultivated Area and Yield">
-                  Cultivated Area and Yield
-                </option>
+                <option value="Economy with Climate Index">Economy with Climate Index</option>
+                <option value="Production with Climate Index">Production with Climate Index</option>
+                <option value="Yield with Climate Index">Yield with Climate Index</option>
+                <option value="Production and Yield">Production and Yield</option>
+                <option value="Cultivated Area and Production">Cultivated Area and Production</option>
+                <option value="Cultivated Area and Yield">Cultivated Area and Yield</option>
               </select>
             </div>
             <button class="next-btn" onclick="fetchColumns(this)">
               <span class="btn-text">Next</span>
             </button>
-            <button
-              class="dashboard-btn"
-              data-dashboard-url="{% url 'Dashboard' %}"
-            >
-              Back to Dashboard
-            </button>
+            <buttonclass="dashboard-btn" data-dashboard-url="{% url 'Dashboard' %}">Back to Dashboard</buttonclass=>
           </div>
 
           <!-- Step 2: Select Visualization Type -->
@@ -112,9 +95,7 @@
                   ></select>
                 </div>
                 <div class="dropdown-container floating-label">
-                  <label class="labelForOtherColumnsForYAxis"
-                    >Specify a Value for the Crop</label
-                  >
+                  <label class="labelForOtherColumnsForYAxis">Specify a Value for the Crop</label>
                   <select
                     class="otherColumnsForYAxis"
                     data-axis-type="metric"
@@ -142,9 +123,7 @@
                   ></select>
                 </div>
                 <div class="dropdown-container floating-label">
-                  <label class="labelForOtherColumnsForZAxis"
-                    >Specify a Value for the Crop</label
-                  >
+                  <label class="labelForOtherColumnsForZAxis">Specify a Value for the Crop</label>
                   <select
                     class="otherColumnsForZAxis"
                     data-axis-type="metric"
@@ -176,9 +155,7 @@
 
     <!-- "Add another" button container -->
     <div id="add-another-container" class="hidden">
-      <button id="addAnotherVisualizationButton">
-        Add another visualization
-      </button>
+      <button id="addAnotherVisualizationButton">Add another visualization</button>
     </div>
   </body>
 </html>

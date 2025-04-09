@@ -214,11 +214,26 @@ def generate_plot(request):
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)})
+    
+@api_view(["POST"])
+def fetch_crops_and_regions(request):
+    data = request.data
+    category = data.get("category")
+    crops = ["Apple", "Banana", "Cotton", "Dates", "Grapes"]
+    if (category == "trade") or (category == "climateIndex"):
 
-def get_predictions():
-    model_path = os.path.join(settings.BASE_DIR, 'EcoCrop', 'pickle_files', 'import_export', 'apple_export_model.pkl')
-    print(model_path)
-    with open(model_path, 'rb') as file:
-        model = pickle.load(file)
+import warnings
+from sklearn.exceptions import InconsistentVersionWarning
+from .model_inputs import train_and_evaluate_climate_index
 
-get_predictions()
+# def get_predictions():
+#     model_path = os.path.join(settings.BASE_DIR, 'EcoCrop', 'pickle_files', 'Sindh_random_forest.pkl')
+#     print(model_path)
+#     with open(model_path, 'rb') as file:
+#         with warnings.catch_warnings():
+#             warnings.simplefilter("ignore", InconsistentVersionWarning)
+#             model = pickle.load(file)
+#         prediction = model.predict(train_and_evaluate_climate_index("Sindh"))
+#         print(prediction)
+
+# get_predictions()
