@@ -8,5 +8,6 @@ urlpatterns = [
     path('Predictions_page', views.predictions, name = 'Predictions_page'),
     path('API/Fetch_columns', views.fetch_columns, name = 'Fetch_columns'),
     path('API/Generate_plot', views.generate_plot, name = 'Generate_plot'),
-    path('API/Fetch_crops_and_regions', views.fetch_crops_and_regions, name = "Fetch_crops_and_regions")
+    path('API/Fetch_crops_and_regions', views.fetch_crops_and_regions, name = "Fetch_crops_and_regions"),
+    path('API/Generate_prediction', views.generate_prediction, name = "Generate_prediction")
 ]

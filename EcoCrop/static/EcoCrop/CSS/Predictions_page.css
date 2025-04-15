@@ -1,11 +1,12 @@
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 /* Style for active selection */
 .importsButton.active,
 .exportsButton.active {
-    background-color: #4CAF50; /* Green background */
+    background-color: #4CAF50;
+    /* Green background */
     color: white;
     border: 2px solid #45a049;
 }
@@ -14,4 +15,44 @@
 .importsButton:hover:not(.active),
 .exportsButton:hover:not(.active) {
     background-color: #ddd;
+}
+
+.productionButton.active,
+.yieldButton.active {
+    background-color: #4CAF50;
+    color: white;
+    border: 2px solid #45a049;
+}
+
+.productionButton:hover:not(.active),
+.yieldButton:hover:not(.active) {
+    background-color: #ddd;
+}
+
+.cropsDropdownList {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.crop-option {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.crop-option:hover {
+    background-color: #f0f0f0;
+}
+
+.regionsDropdownList {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.region-option {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.region-option:hover {
+    background-color: #f0f0f0;
 }

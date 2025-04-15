@@ -3,9 +3,14 @@ import os
 from django.conf import settings
 from .metadata_about_dataset import dictionary_of_dataframes, dictionary_of_columns, get_name
 import plotly.express as px
-from django.http import HttpRequest, JsonResponse
+from django.http import JsonResponse
 from rest_framework.decorators import api_view
+from .metadata_about_models import crops, regions_for_production_yield, regions_for_production_yield_with_climate_index, regions_for_climate_index, get_crop, get_region
+import pandas as pd
+import numpy as np
 import pickle
+import warnings
+from sklearn.exceptions import InconsistentVersionWarning
 
 # print("Looking for file in:", os.getcwd())
 
@@ -24,13 +29,10 @@ def predictions(request):
     return render(request, "Predictions_page.html")
 
 @api_view(["POST"])
-def fetch_columns(request: HttpRequest):
+def fetch_columns(request):
     try:
         data = request.data
         category = data.get("category")
-
-        # Debugging category value
-        print(f"Received category: {category}")
 
         if not category:
             return JsonResponse({"success": False, "message": "No category provided!"}, status=400)
@@ -53,11 +55,7 @@ def fetch_columns(request: HttpRequest):
 
         axes_values = [x_axis, y_axis, z_axis]
 
-        # Debugging output
-        print(f"Columns for {category}: {axes_values}")
-
         return JsonResponse({"success": True, "axes_values": axes_values})
-        # return JsonResponse({"success": True, "columns": columns})
 
     except Exception as e:
         print("There's an issue!")
@@ -69,7 +67,6 @@ def generate_plot(request):
     try:
         data = request.data
 
-        # Extract user selections
         category = data.get("category")
         visualization_type = data.get("visType")
         x_axis = data.get("xAxis")
@@ -217,23 +214,166 @@ def generate_plot(request):
     
 @api_view(["POST"])
 def fetch_crops_and_regions(request):
-    data = request.data
-    category = data.get("category")
-    crops = ["Apple", "Banana", "Cotton", "Dates", "Grapes"]
-    if (category == "trade") or (category == "climateIndex"):
+    try:
+        data = request.data
+        category = data.get("category")
+
+        crops_list = []
+        regions_list = []
+        
+        if (category == "trade"):
+            crops_list = crops
+            regions_list = []
+        elif category == "productionAndYield":
+            crops_list = crops
+            regions_list = regions_for_production_yield
+        elif category == "productionAndYieldWithClimateIndex":
+            crops_list = crops
+            regions_list = regions_for_production_yield_with_climate_index
+        else:
+            crops_list = []
+            regions_list = regions_for_climate_index
+        
+        return JsonResponse({"success": True, "crops": crops_list, "regions": regions_list})
+    
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
 
 import warnings
 from sklearn.exceptions import InconsistentVersionWarning
-from .model_inputs import train_and_evaluate_climate_index
 
-# def get_predictions():
-#     model_path = os.path.join(settings.BASE_DIR, 'EcoCrop', 'pickle_files', 'Sindh_random_forest.pkl')
-#     print(model_path)
-#     with open(model_path, 'rb') as file:
-#         with warnings.catch_warnings():
-#             warnings.simplefilter("ignore", InconsistentVersionWarning)
-#             model = pickle.load(file)
-#         prediction = model.predict(train_and_evaluate_climate_index("Sindh"))
-#         print(prediction)
+@api_view(["POST"])
+def generate_prediction(request):
+    try:
+        data = request.data
+        print("Data received:", data)
+        category = [data.get("type")]
+        prediction = None
+        
+        if category[0] == "trade":
+            category.append(data.get("tradeType"))
+            trade_type = data.get("tradeType").lower()[:-1]
+            crop = get_crop(int(data.get("cropId")))
+            production = int(data.get("production"))
+            file_name = f'{crop}_{trade_type}_model.pkl'
+            model_path = os.path.join(settings.BASE_DIR, 'EcoCrop', 'pickle_files', 'import_and_export', file_name)
+            print(model_path)
+            with open(model_path, 'rb') as file:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", InconsistentVersionWarning)
+                    model = pickle.load(file)
+                prediction = model.predict([[production]]).tolist() # Convert ndarray to list
 
-# get_predictions()
+        if category[0] == "productionAndYield":
+            category.append(data.get("productionType"))
+            production_type = data.get("productionType").lower()
+            crop = get_crop(int(data.get("cropId")))
+            region = get_region(category[0], int(data.get("regionId")))
+            area = int(data.get("area"))
+            file_name = f'{crop}_{region}_{production_type}_model.pkl'
+            model_path = os.path.join(settings.BASE_DIR, 'EcoCrop', 'pickle_files', 'production_and_yield', file_name)
+            print(model_path)
+            with open(model_path, 'rb') as file:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", InconsistentVersionWarning)
+                    model = pickle.load(file)
+                prediction = model.predict([[area]]).tolist()
+                print(prediction)
+
+        if category[0] == "productionAndYieldWithClimateIndex":
+            category.append(data.get("productionType"))
+            production_type = data.get("productionType").lower()
+            crop = get_crop(int(data.get("cropId")))
+            region = get_region(category[0], int(data.get("regionId")))
+            area = int(data.get("area"))
+            climate_index = int(data.get("climateIndex"))
+            file_name = f'{crop}1_{region}_{production_type}_model.pkl'
+            model_path = os.path.join(settings.BASE_DIR, 'EcoCrop', 'pickle_files', 'production_and_yield_with_climate', file_name)
+            print(model_path)
+            with open(model_path, 'rb') as file:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", InconsistentVersionWarning)
+                    model = pickle.load(file)
+                prediction = model.predict([[climate_index, 0, area, climate_index, 0, area]]).tolist()
+                print(prediction)
+
+        if category[0] == "climateIndex":
+            category.append(None)
+            df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Climate Data - Original sheet")
+            region = get_region(category[0], int(data.get("regionId")))
+            forecast_period = int(data.get("months"))
+            # Dynamic target column for the selected region
+            target_column = f"{region}_Climate_Index"
+            
+            # Check if the region and required columns exist
+            required_features = [
+                f"{region}_Combined_temperature_normalized",
+                f"{region}_shortwave_radiation_normalized",
+                f"{region}_precipitation_hours_normalized",
+                f"{region}_fao_evapotranspiration_normalized",
+            ]
+
+            # Subset data for the region
+            year_month = df['year_month']  # Extract the year_month column
+
+            # Create the X DataFrame using only the specified features
+            X = df[required_features]
+            y = df[target_column]  # Target variable
+
+            # Sort the data chronologically by year_month
+            data_sorted = pd.DataFrame({'year_month': year_month, 'y': y})
+            for col in X.columns:
+                data_sorted[col] = X[col]
+            data_sorted = data_sorted.sort_values(by='year_month', ascending=True)
+
+            # Use all data up to February 2025 for training
+            train_data = data_sorted[data_sorted['year_month'] <= '2025-02']
+            
+            # Generate future dates starting from March 2025
+            last_date = pd.to_datetime('2025-02')
+            future_dates = pd.date_range(start=last_date + pd.DateOffset(months=1), 
+                                        periods=forecast_period, 
+                                        freq='ME')  # Changed from 'M' to 'ME'
+            
+            # Create future feature data using seasonal patterns
+            # Get the last 12 months of data for each feature
+            last_year_data = train_data.tail(12)
+            
+            # Create future features by repeating the seasonal pattern
+            future_features = pd.DataFrame()
+            for feature in required_features:
+                # Get the seasonal pattern from last year
+                seasonal_pattern = last_year_data[feature].values
+                # Repeat the pattern for the forecast period
+                repeated_pattern = np.tile(seasonal_pattern, forecast_period // 12 + 1)[:forecast_period]
+                future_features[feature] = repeated_pattern
+
+            file_name = f'{region}_climate_index_model.pkl'
+            model_path = os.path.join(settings.BASE_DIR, 'EcoCrop', 'pickle_files', 'climate_index', file_name)
+            print(model_path)
+            with open(model_path, 'rb') as file:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", InconsistentVersionWarning)
+                    model = pickle.load(file)
+                future_predictions = model.predict(future_features)
+        
+                # Ensure predictions are within 0-1 range
+                future_predictions = np.clip(future_predictions, 0, 1)
+                
+                prediction = []
+                for date, value in zip(future_dates, future_predictions):
+                    # Format the date as 'YYYY-MM-DD'
+                    formatted_date = date.strftime('%Y-%m-%d')
+                    
+                    # Round the value to 3 decimal places
+                    rounded_value = round(float(value), 3)
+                    
+                    prediction.append([formatted_date, rounded_value])
+                print(prediction)
+        print(prediction)
+        
+        return JsonResponse({"success": True, "category": category, "prediction": prediction})
+    
+    except Exception as e:
+        print("Here")
+        return JsonResponse({"success": False, "error": str(e)})

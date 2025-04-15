@@ -2,15 +2,9 @@ import pandas as pd
 
 climate_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Climate Data")
 economy_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Economy Data")
-economy_with_climate_index_df = pd.read_excel(
-    "fyp_dataset.xlsx", sheet_name="Economy with Climate Index"
-)
-production_with_climate_index_df = pd.read_excel(
-    "fyp_dataset.xlsx", sheet_name="production|climate index"
-)
-yield_with_climate_index_df = pd.read_excel(
-    "fyp_dataset.xlsx", sheet_name="yield|climate index"
-)
+economy_with_climate_index_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Economy with Climate Index")
+production_with_climate_index_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="production|climate index")
+yield_with_climate_index_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="yield|climate index")
 production_yield_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="production|yield")
 area_and_production_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Area|production")
 area_and_yield_df = pd.read_excel("fyp_dataset.xlsx", sheet_name="Yield|Area")
@@ -275,25 +269,3 @@ def get_name(var):
     for name, value in globals().items():
         if value is var:
             return name
-        
-# category = input("Enter a category: ")
-# df = dictionary_of_dataframes[category]
-# sheet_name = get_name(df)
-# print(sheet_name)
-# sheet = dictionary_of_columns[sheet_name]
-
-# input_for_column_for_x_axis = input("Enter a column's name for x-axis: ")
-# input_for_crop_for_y_axis = input("Enter a crop's name for y-axis: ")
-# input_for_column_for_y_axis = input("Enter a column's name for y-axis: ")
-# input_for_crop_for_z_axis = input("Enter a crop's name for z-axis: ")
-# input_for_column_for_z_axis = input("Enter a column's name for z-axis: ")
-# column_for_x_axis = sheet[input_for_column_for_x_axis]["name"]
-# column_for_y_axis = sheet[input_for_column_for_y_axis]["name"]
-# column_for_z_axis = sheet[input_for_column_for_z_axis]["name"]
-# x_values = df[df["Crop"] == input_for_crop_for_y_axis][column_for_x_axis]
-# y_values = df[df["Crop"] == input_for_crop_for_y_axis][column_for_y_axis]
-# z_values = df[df["Crop"] == input_for_crop_for_z_axis][column_for_z_axis]
-
-# print(x_values)
-# print(y_values)
-# print(z_values)

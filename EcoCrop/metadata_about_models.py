@@ -7,8 +7,8 @@ import_export_models = [
     "cotton_import_model.pkl",
     "dates_export_model.pkl",
     "dates_import_model.pkl",
-    "grape_export_model.pkl",
-    "grape_import_model.pkl",
+    "grapes_export_model.pkl",
+    "grapes_import_model.pkl",
     "mango_export_model.pkl",
     "mango_import_model.pkl",
     "onion_export_model.pkl",
@@ -267,17 +267,78 @@ production_yield_with_climate_index_models = [
     "wheat1_Sindh_yield_model.pkl",
 ]
 
-crops = sorted({
+climate_index_models = [
+    "Balochistan_climate_index_model.pkl",
+    "Khyber_Pakhtunkhwa_climate_index_model.pkl",
+    "Punjab_climate_index_model.pkl",
+    "Sindh_climate_index_model.pkl"
+]
+
+set_of_crops = sorted({
     model.split("_")[0].replace("1", "") 
     for model in (import_export_models + production_yield_models + production_yield_with_climate_index_models)
 })
 
-regions_production_yield = sorted({
-    "_".join(model.split("_")[1:-2]) 
+crops = []
+counter = 0
+for crop in set_of_crops:
+    crop_dict = {"id": counter, "name": crop}
+    crops.append(crop_dict)
+    counter += 1
+
+set_of_regions_for_production_yield = sorted({
+    "_".join(model.split("_")[1:-2]).replace("_", " ")
     for model in production_yield_models
 })
 
-regions_production_yield_with_climate_index = sorted({
-    "_".join(model.split("_")[1:-2]) 
+regions_for_production_yield = []
+counter = 0
+for region in set_of_regions_for_production_yield:
+    region_dict = {"id": counter, "name": region}
+    regions_for_production_yield.append(region_dict)
+    counter += 1
+
+set_of_regions_for_production_yield_with_climate_index = sorted({
+    "_".join(model.split("_")[1:-2]).replace("_", " ")
     for model in production_yield_with_climate_index_models
 })
+
+regions_for_production_yield_with_climate_index = []
+counter = 0
+for region in set_of_regions_for_production_yield_with_climate_index:
+    region_dict = {"id": counter, "name": region}
+    regions_for_production_yield_with_climate_index.append(region_dict)
+    counter += 1
+
+set_of_regions_for_climate_index = sorted({
+    "_".join(model.split("_")[0:-3]).replace("_", " ")
+    for model in climate_index_models
+})
+
+regions_for_climate_index = []
+counter = 0
+for region in set_of_regions_for_climate_index:
+    region_dict = {"id": counter, "name": region}
+    regions_for_climate_index.append(region_dict)
+    counter += 1
+    
+def get_crop(crop_id):
+    for crop in crops:
+        if crop["id"] == crop_id:
+            return crop["name"]
+        
+def get_region(category, region_id):
+    if category == "productionAndYield":
+        for region in regions_for_production_yield:
+            if region["id"] == region_id:
+                return region["name"].replace(" ", "_")
+            
+    if category == "productionAndYieldWithClimateIndex":
+        for region in regions_for_production_yield_with_climate_index:
+            if region["id"] == region_id:
+                return region["name"].replace(" ", "_")
+            
+    if category == "climateIndex":
+        for region in regions_for_climate_index:
+            if region["id"] == region_id:
+                return region["name"].replace(" ", "_")

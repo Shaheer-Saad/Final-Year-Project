@@ -11,133 +11,136 @@
   </head>
 
   <body>
-    <div class="categoryButtons hidden">
-      <h2>Choose What You'd Like to Predict<h2>
-      <button class="tradeButton">Trade</button>
-      <button class="productionAndYieldButton">Production and Yield</button>
-      <button class="productionAndYieldWithClimateIndexButton">Production and Yield with the inclusion of Climate Index</button>
-      <button class="climateIndexButton" >Climate Index</button>
-    </div>
-
-
-    <div class="predictions-container">
+    <div class="predictionsContainer">
       <!-- Predictions will be added here dynamically -->
     </div>
     
     <!-- Hidden template for new predictions -->
-    <div class="prediction-template" class="hidden">
-      <div class="prediction-wrapper">
-        <div class="tradeContainer">
+    <div id="predictionTemplate">
+      <div class="predictionWrapper">
+        <div class="container">
 
-          <div class="userInput hidden">
-            <button class="importsButton" data-option-group="trade-type">Imports</button>
-            <button class="exportsButton" data-option-group="trade-type">Exports</button>
-          
-            <div class="cropsDropdownContainer">
-              <button class="cropsDropdownTrigger"></button>
-              <div class="cropsDropdownContent">
-                <div class="cropsDropdownSearch"></div>
-                <div class="cropsDropdownList"></div>
-              </div>
-            </div>
-            
-            <div class="yearRangeInputContainer">
-              <input type="text" class="rangeOfYearsInput" placeholder="Enter year range (e.g., 2015-2020)">
-              <div class="inputSuggestions"></div>
-            </div>
+          <div class="categoryButtons hidden">
+            <h2>Choose What You'd Like to Predict<h2>
+            <button class="tradeButton">Trade</button>
+            <button class="productionAndYieldButton">Production and Yield</button>
+            <button class="productionAndYieldWithClimateIndexButton">Production and Yield with the inclusion of Climate Index</button>
+            <button class="climateIndexButton" >Climate Index</button>
           </div>
-        </div>
-
-        <div class="productionInputContainer">
-          <input type="text" class="productionInput" placeholder="Enter expected production (in tons)">
-          <div class="inputSuggestions"></div>
-        </div>
         
-        <div class="productionAndYieldContainer">
-          
-          <div class="userInput hidden">
-            <div class="cropsDropdownContainer">
-              <button class="cropsDropdownTrigger"></button>
-              <div class="cropsDropdownContent">
-                <div class="cropsDropdownSearch"></div>
-                <div class="cropsDropdownList"></div>
-              </div>
-            </div>
+          <div class="tradeContainer hidden">
+
+            <form class="predictionForm" data-type="trade">
+              <button class="importsButton active" data-option-group="trade-type">Imports</button>
+              <button class="exportsButton" data-option-group="trade-type">Exports</button>
             
-            <div class="regionsDropdownContainer">
-              <button class="regionsDropdownTrigger"></button>
-              <div class="regionsDropdownContent">
-                <div class="regionsDropdownSearch"></div>
-                <div class="regionsDropdownList"></div>
+              <div class="cropsDropdownContainer">
+                <button class="cropsDropdownTrigger">Choose a crop</button>
+                <div class="cropsDropdownContent">
+                  <div class="cropsDropdownSearch"></div>
+                  <div class="cropsDropdownList"></div>
+                </div>
               </div>
-            </div>
 
-            <div class="yearRangeInputContainer">
-              <input type="text" class="rangeOfYearsInput" placeholder="Enter range of years (e.g., 2015-2020)">
-              <div class="inputSuggestions"></div>
-            </div>
-
-            <div class="areaInputContainer">
-              <input type="text" class="areaInput" placeholder="Enter area (x1000 acres)">
-              <div class="inputSuggestions"></div>
-            </div>
+              <div class="productionInputContainer">
+                <input type="text" class="productionInput" placeholder="Enter expected production (in tons)">
+                <div class="inputSuggestions"></div>
+              </div>
+              <button type="submit" class="generateButton">Generate Prediction</button>
+            </form>
           </div>
-        </div>
-        
-        <div class="productionAndYieldWithClimateIndexContainer">
           
-          <div class="userInput hidden">
-            <div class="cropsDropdownContainer">
-              <button class="cropsDropdownTrigger"></button>
-              <div class="cropsDropdownContent">
-                <div class="cropsDropdownSearch"></div>
-                <div class="cropsDropdownList"></div>
-              </div>
-            </div>
+          <div class="productionAndYieldContainer hidden">
             
-            <div class="regionsDropdownContainer">
-              <button class="regionsDropdownTrigger"></button>
-              <div class="regionsDropdownContent">
-                <div class="regionsDropdownSearch"></div>
-                <div class="regionsDropdownList"></div>
+            <form class="predictionForm" data-type="productionAndYield">
+              <button class="productionButton active" data-option-group="production-type">Production</button>
+              <button class="yieldButton" data-option-group="production-type">Yield</button>
+
+              <div class="cropsDropdownContainer">
+                <button class="cropsDropdownTrigger">Choose a crop</button>
+                <div class="cropsDropdownContent">
+                  <div class="cropsDropdownSearch"></div>
+                  <div class="cropsDropdownList"></div>
+                </div>
               </div>
-            </div>
+              
+              <div class="regionsDropdownContainer">
+                <button class="regionsDropdownTrigger">Choose a region</button>
+                <div class="regionsDropdownContent">
+                  <div class="regionsDropdownSearch"></div>
+                  <div class="regionsDropdownList"></div>
+                </div>
+              </div>
 
-            <div class="yearRangeInputContainer">
-              <input type="text" class="rangeOfYearsInput" placeholder="Enter year range (e.g., 2015-2020)">
-              <div class="inputSuggestions"></div>
-            </div>
-
-            <div class="areaInputContainer">
-              <input type="text" class="areaInput" placeholder="Enter area (x1000 acres)">
-              <div class="inputSuggestions"></div>
-            </div>
-
-            <div class="climateIndexInput">
-              <input type="text" class="climateIndexInput" placeholder="Enter climate index">
-              <div class="inputSuggestions"></div>
-            </div>
+              <div class="areaInputContainer">
+                <input type="text" class="areaInput" placeholder="Enter area (x1000 acres)">
+                <div class="inputSuggestions"></div>
+              </div>
+              <button type="submit" class="generateButton">Generate Prediction</button>
+            </form>
           </div>
-        </div>
-        
-        <div class="climateIndexContainer">
           
-          <div class="userInput hidden">
-            <div class="regionsDropdownContainer">
-              <button class="regionsDropdownTrigger"></button>
-              <div class="regionsDropdownContent">
-                <div class="regionsDropdownSearch"></div>
-                <div class="regionsDropdownList"></div>
+          <div class="productionAndYieldWithClimateIndexContainer hidden">
+            
+            <form class="predictionForm" data-type="productionAndYieldWithClimateIndex">
+              <button class="productionButton active" data-option-group="production-type">Production</button>
+              <button class="yieldButton" data-option-group="production-type">Yield</button>
+              
+              <div class="cropsDropdownContainer">
+                <button class="cropsDropdownTrigger">Choose a crop</button>
+                <div class="cropsDropdownContent">
+                  <div class="cropsDropdownSearch"></div>
+                  <div class="cropsDropdownList"></div>
+                </div>
               </div>
-            </div>
+              
+              <div class="regionsDropdownContainer">
+                <button class="regionsDropdownTrigger">Choose a region</button>
+                <div class="regionsDropdownContent">
+                  <div class="regionsDropdownSearch"></div>
+                  <div class="regionsDropdownList"></div>
+                </div>
+              </div>
 
-            <div class="monthsInputContainer">
-              <input type="text" id="monthsInput hidden" placeholder="Enter the numnber of months (e.g., 1, 2, ...)">
-              <div class="inputSuggestions"></div>
-            </div>
+              <div class="areaInputContainer">
+                <input type="text" class="areaInput" placeholder="Enter area (x1000 acres)">
+                <div class="inputSuggestions"></div>
+              </div>
+
+              <div class="climateIndexInputContainer">
+                <input type="text" class="climateIndexInput" placeholder="Enter climate index">
+                <div class="inputSuggestions"></div>
+              </div>
+              <button type="submit" class="generateButton">Generate Prediction</button>
+            </form>
           </div>
+          
+          <div class="climateIndexContainer hidden">
+            
+            <form class="predictionForm" data-type="climateIndex">
+              <div class="regionsDropdownContainer">
+                <button class="regionsDropdownTrigger">Choose a region</button>
+                <div class="regionsDropdownContent">
+                  <div class="regionsDropdownSearch"></div>
+                  <div class="regionsDropdownList"></div>
+                </div>
+              </div>
+
+              <div class="monthsInputContainer">
+                <input type="text" class="monthsInput" placeholder="Enter the number of months (e.g., 1, 2, ...)">
+                <div class="inputSuggestions"></div>
+              </div>
+              <button type="submit" class="generateButton">Generate Prediction</button>
+            </form>
+          </div>
+          <button class="backButton hidden">Back</button>
         </div>
       </div>
+    </div>
+    
+    <!-- "Add another" button container -->
+    <div class="addAnotherPredictionButtonContainer" class="hidden">
+      <button id="addAnotherPredictionButton">Add another Prediction</button>
     </div>
   </body>
 </html>
