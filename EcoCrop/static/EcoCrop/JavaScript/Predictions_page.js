@@ -314,6 +314,7 @@ function collectFormData(form) {
             }
 
             formData.tradeType = activeTradeType.textContent.trim();
+            formData.crop = form.querySelector('.cropsDropdownTrigger').textContent.trim();
             formData.cropId = form.querySelector('.cropsDropdownTrigger').dataset.value;
             formData.production = form.querySelector('.productionInput').value;
             break;
@@ -327,7 +328,9 @@ function collectFormData(form) {
             }
 
             formData.productionType = activeProductionType.textContent.trim();
+            formData.crop = form.querySelector('.cropsDropdownTrigger').textContent.trim();
             formData.cropId = form.querySelector('.cropsDropdownTrigger').dataset.value;
+            formData.region = form.querySelector('.regionsDropdownTrigger').textContent.trim();
             formData.regionId = form.querySelector('.regionsDropdownTrigger').dataset.value;
             formData.area = form.querySelector('.areaInput').value;
             break;
@@ -341,13 +344,16 @@ function collectFormData(form) {
             }
 
             formData.productionType = activeProductionTypeWithClimate.textContent.trim();
+            formData.crop = form.querySelector('.cropsDropdownTrigger').textContent.trim();
             formData.cropId = form.querySelector('.cropsDropdownTrigger').dataset.value;
+            formData.region = form.querySelector('.regionsDropdownTrigger').textContent.trim();
             formData.regionId = form.querySelector('.regionsDropdownTrigger').dataset.value;
             formData.area = form.querySelector('.areaInput').value;
             formData.climateIndex = form.querySelector('.climateIndexInput').value;
             break;
 
         case 'climateIndex':
+            formData.region = form.querySelector('.regionsDropdownTrigger').textContent.trim();
             formData.regionId = form.querySelector('.regionsDropdownTrigger').dataset.value;
             formData.months = form.querySelector('.monthsInput').value;
             break;
@@ -357,11 +363,24 @@ function collectFormData(form) {
 }
 
 function validateFormData(form, formData) {
+    // Helper function to validate numbers
+    const isValidNumber = (value, min = 0, allowDecimals = true) => {
+        if (value === '' || isNaN(value)) return false;
+        const num = parseFloat(value);
+        if (num < min) return false;
+        if (!allowDecimals && !Number.isInteger(num)) return false;
+        return true;
+    };
+
     switch (formData.type) {
         case 'trade':
             console.log("Form data: ", formData);
             if (!formData.tradeType || !formData.cropId || !formData.production) {
-                alert("Please fill all trade prediction fields");
+                alert("Please fill all available fields.");
+                return false;
+            }
+            if (!isValidNumber(formData.production)) {
+                alert("Please enter a valid positive number for production.");
                 return false;
             }
             break;
@@ -369,7 +388,11 @@ function validateFormData(form, formData) {
         case 'productionAndYield':
             console.log("Form data: ", formData);
             if (!formData.cropId || !formData.regionId || !formData.area) {
-                alert("Please fill all production and yield fields");
+                alert("Please fill all available fields.");
+                return false;
+            }
+            if (!isValidNumber(formData.area)) {
+                alert("Please enter a valid positive number for area.");
                 return false;
             }
             break;
@@ -377,7 +400,11 @@ function validateFormData(form, formData) {
         case 'productionAndYieldWithClimateIndex':
             console.log("Form data: ", formData);
             if (!formData.cropId || !formData.regionId || !formData.area || !formData.climateIndex) {
-                alert("Please fill all production and yield with climate index fields");
+                alert("Please fill all available fields.");
+                return false;
+            }
+            if (!isValidNumber(formData.area) || !isValidNumber(formData.climateIndex)) {
+                alert("Please enter a valid positive number for area and climateIndex.");
                 return false;
             }
             break;
@@ -385,7 +412,11 @@ function validateFormData(form, formData) {
         case 'climateIndex':
             console.log("Form data: ", formData);
             if (!formData.regionId || !formData.months) {
-                alert("Please fill all climate index fields");
+                alert("Please fill all available fields.");
+                return false;
+            }
+            if (!isValidNumber(formData.months)) {
+                alert("Please enter a valid positive number for months.");
                 return false;
             }
             break;
@@ -417,7 +448,7 @@ async function submitPrediction(form, formData, container) {
         generateBtn.disabled = false;
 
         if (data.success) {
-            displayPredictionResult(form, data, container);
+            displayPredictionResult(form, formData, data, container);
         } else {
             alert("Prediction failed: " + (data.message || "Unknown error"));
         }
@@ -428,7 +459,7 @@ async function submitPrediction(form, formData, container) {
     }
 }
 
-function displayPredictionResult(form, data, container) {
+function displayPredictionResult(form, formData, data, container) {
     // Remove any existing result display
     const existingResult = container.querySelector('.predictionResult');
     if (existingResult) {
@@ -450,35 +481,61 @@ function displayPredictionResult(form, data, container) {
 
     // Create a title based on the prediction type
     const title = document.createElement('h3');
-    title.textContent = `Prediction Results for ${data.category[1] || data.category[0]}`;
+    // title.textContent = `Prediction Results for ${data.category[1] || data.category[0]}`;
+    const categoryDisplayNames = {
+        trade: "Trade",
+        productionAndYield: "Production and Yield",
+        productionAndYieldWithClimateIndex: "Production and Yield with Climate Index",
+        climateIndex: "Climate Index"
+    };
+
+    const displayCategory = categoryDisplayNames[data.category[0]] || data.category[0];
+    title.textContent = `Prediction Results for ${data.category[1] || displayCategory}`;
     resultContainer.appendChild(title);
 
     // Handle different prediction types
     if (data.category[0] === 'trade') {
-        console.log("Category: ", data.category);
-        console.log("Prediction: ", data.prediction);
+        const userInputs = document.createElement('p');
+        userInputs.innerHTML = `Crop: ${formData.crop}<br>Trade Type: ${formData.tradeType}<br>Production: ${formData.production} (x1000 tons)`;
+        resultContainer.appendChild(userInputs);
         const resultText = document.createElement('p');
-        resultText.textContent = `Predicted ${data.category[1].toLowerCase()}: ${data.prediction[0].toFixed(2)} tons`;
+        resultText.textContent = `Predicted ${data.category[1]}: ${data.prediction[0].toFixed(2)} (x1000 tons)`;
         resultContainer.appendChild(resultText);
+        const parentDiv = form.parentNode;
+        console.log("Parent container: ", parentDiv);
+        parentDiv.insertBefore(resultContainer, form.nextSibling);
     }
     else if (data.category[0] === 'productionAndYield') {
+        const userInputs = document.createElement('p');
+        userInputs.innerHTML = `Crop: ${formData.crop}<br>Region: ${formData.region}<br>Area: ${formData.area} (x1000 acres)`;
+        resultContainer.appendChild(userInputs);
         const resultText = document.createElement('p');
-        const unit = data.category[1] === 'Production' ? 'tons' : 'tons per acre';
-        resultText.textContent = `Predicted ${data.category[1].toLowerCase()}: ${data.prediction[0].toFixed(2)} ${unit}`;
+        resultText.textContent = `Predicted ${data.category[1]}: ${data.prediction[0].toFixed(2)} (x1000 tons)`;
         resultContainer.appendChild(resultText);
+        const parentDiv = form.parentNode;
+        console.log("Parent container: ", parentDiv);
+        parentDiv.insertBefore(resultContainer, form.nextSibling);
     }
     else if (data.category[0] === 'productionAndYieldWithClimateIndex') {
+        const userInputs = document.createElement('p');
+        userInputs.innerHTML = `Crop: ${formData.crop}<br>Region: ${formData.region}<br>Area: ${formData.area} (x1000 acres)<br>Climate Index: ${formData.climateIndex}`;
+        resultContainer.appendChild(userInputs);
         const resultText = document.createElement('p');
-        const unit = data.category[1] === 'Production' ? 'tons' : 'tons per acre';
-        resultText.textContent = `Predicted ${data.category[1].toLowerCase()}: ${data.prediction[0].toFixed(2)} ${unit}`;
+        resultText.textContent = `Predicted ${data.category[1]}: ${data.prediction[0].toFixed(2)} (x1000 tons)`;
         resultContainer.appendChild(resultText);
+        const parentDiv = form.parentNode;
+        console.log("Parent container: ", parentDiv);
+        parentDiv.insertBefore(resultContainer, form.nextSibling);
 
-        const climateNote = document.createElement('p');
-        climateNote.textContent = `(with climate index factor: ${data.climateIndex})`;
-        climateNote.style.fontStyle = 'italic';
-        resultContainer.appendChild(climateNote);
+        // const climateNote = document.createElement('p');
+        // climateNote.textContent = `(with climate index factor: ${data.climateIndex})`;
+        // climateNote.style.fontStyle = 'italic';
+        // resultContainer.appendChild(climateNote);
     }
     else if (data.category[0] === 'climateIndex') {
+        const userInputs = document.createElement('p');
+        userInputs.innerHTML = `Region: ${formData.region}<br>Months: ${formData.months}`;
+        resultContainer.appendChild(userInputs);
         const resultTitle = document.createElement('h4');
         resultTitle.textContent = 'Climate Index Forecast:';
         resultContainer.appendChild(resultTitle);
@@ -494,6 +551,25 @@ function displayPredictionResult(form, data, container) {
         });
 
         resultContainer.appendChild(forecastList);
+
+        const plotContainer = document.createElement('div');
+        plotContainer.className = "plotContainer";
+        console.log("HTML content: ", data.plot_html);
+        plotContainer.innerHTML = data.plot_html;
+        resultContainer.appendChild(plotContainer);
+        const parentDiv = form.parentNode;
+        console.log("Parent container: ", parentDiv);
+        parentDiv.insertBefore(resultContainer, form.nextSibling);
+        const scripts = plotContainer.getElementsByTagName('script');
+        console.log("Scripts: ", scripts);
+        for (let i = 0; i < scripts.length; i++) {
+            try {
+                eval(scripts[i].innerText);
+                console.log("Done executing plot script");
+            } catch (e) {
+                console.error("Error executing plot script:", e);
+            }
+        }
     }
 
     // Add some basic styling
@@ -506,9 +582,9 @@ function displayPredictionResult(form, data, container) {
     console.log("Form: ", form);
 
     // Insert the result after the form
-    const parentDiv = form.parentNode;
-    console.log("Parent container: ", parentDiv);
-    form.parentNode.insertBefore(resultContainer, form.nextSibling);
+    // const parentDiv = form.parentNode;
+    // console.log("Parent container: ", parentDiv);
+    // parentDiv.insertBefore(resultContainer, form.nextSibling);
 
     // Show "Add another" button
     document.querySelector('.addAnotherPredictionButtonContainer').classList.remove('hidden');

@@ -28,6 +28,9 @@ def visualizations(request):
 def predictions(request):
     return render(request, "Predictions_page.html")
 
+def test_view(request):
+    return render(request, "test_page.html")
+
 @api_view(["POST"])
 def fetch_columns(request):
     try:
@@ -249,6 +252,7 @@ def generate_prediction(request):
         print("Data received:", data)
         category = [data.get("type")]
         prediction = None
+        plot_html = None
         
         if category[0] == "trade":
             category.append(data.get("tradeType"))
@@ -285,8 +289,8 @@ def generate_prediction(request):
             production_type = data.get("productionType").lower()
             crop = get_crop(int(data.get("cropId")))
             region = get_region(category[0], int(data.get("regionId")))
-            area = int(data.get("area"))
-            climate_index = int(data.get("climateIndex"))
+            area = float(data.get("area"))
+            climate_index = float(data.get("climateIndex"))
             file_name = f'{crop}1_{region}_{production_type}_model.pkl'
             model_path = os.path.join(settings.BASE_DIR, 'EcoCrop', 'pickle_files', 'production_and_yield_with_climate', file_name)
             print(model_path)
@@ -361,6 +365,8 @@ def generate_prediction(request):
                 future_predictions = np.clip(future_predictions, 0, 1)
                 
                 prediction = []
+                x_values = []
+                y_values = []
                 for date, value in zip(future_dates, future_predictions):
                     # Format the date as 'YYYY-MM-DD'
                     formatted_date = date.strftime('%Y-%m-%d')
@@ -369,10 +375,17 @@ def generate_prediction(request):
                     rounded_value = round(float(value), 3)
                     
                     prediction.append([formatted_date, rounded_value])
+                    x_values.append(formatted_date)
+                    y_values.append(rounded_value)
+                print(x_values)
+                print(y_values)
                 print(prediction)
+                fig = px.bar(x=x_values, y=y_values, title=f"{category[0]} - Bar Chart", labels={"x": "Date (YYYY-MM-DD)", "y": "Climate Index"})
+                plot_html = fig.to_html(full_html=False)
+                print(plot_html)
         print(prediction)
         
-        return JsonResponse({"success": True, "category": category, "prediction": prediction})
+        return JsonResponse({"success": True, "category": category, "prediction": prediction, "plot_html": plot_html})
     
     except Exception as e:
         print("Here")

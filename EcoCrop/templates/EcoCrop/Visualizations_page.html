@@ -1,18 +1,17 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EcoCrop - Visualizations</title>
-    <link
-      rel="stylesheet"
-      href="{% static 'EcoCrop/CSS/Visualizations_page.css' %}"
-    />
-    <script
-      src="{% static 'EcoCrop/JavaScript/Visualizations_page.js' %}"
-      defer
-    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'EcoCrop/CSS/Visualizations_page.css' %}"/>
+    <script src="{% static 'EcoCrop/JavaScript/Visualizations_page.js' %}" defer></script>
     <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
   </head>
 
@@ -69,7 +68,6 @@
 
           <!-- Step 3: Select Axes -->
           <div class="step3 hidden">
-            <h4>Select Axes Values</h4>
             <div class="error-message hidden"></div>
 
             <div class="dropdown-container floating-label">
@@ -86,6 +84,7 @@
               </div>
               <div class="specificYAxis hidden">
                 <label class="labelForSpecificYAxis">Y-Axis</label>
+                <br><br>
                 <div class="dropdown-container floating-label">
                   <label class="labelForCropsForYAxis">Crop</label>
                   <select
@@ -155,7 +154,10 @@
 
     <!-- "Add another" button container -->
     <div id="add-another-container" class="hidden">
-      <button id="addAnotherVisualizationButton">Add another visualization</button>
+      <button id="addAnotherVisualizationButton">
+        <i class="fas fa-plus"></i>
+        Add another visualization
+      </button>
     </div>
   </body>
 </html>

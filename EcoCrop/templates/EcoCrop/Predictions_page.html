@@ -5,9 +5,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{% static 'EcoCrop/CSS/Predictions_page.css' %}" />
-    <script src="{% static 'EcoCrop/JavaScript/Predictions_page.js' %}" defer></script>
     <title>EcoCrop - Predictions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'EcoCrop/CSS/Predictions_page.css' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <script src="{% static 'EcoCrop/JavaScript/Predictions_page.js' %}" defer></script>
   </head>
 
   <body>
@@ -21,17 +26,16 @@
         <div class="container">
 
           <div class="categoryButtons hidden">
-            <h2>Choose What You'd Like to Predict<h2>
+            <h2>Choose What You'd Like to Predict</h2>
             <button class="tradeButton">Trade</button>
             <button class="productionAndYieldButton">Production and Yield</button>
             <button class="productionAndYieldWithClimateIndexButton">Production and Yield with the inclusion of Climate Index</button>
-            <button class="climateIndexButton" >Climate Index</button>
+            <button class="climateIndexButton">Climate Index</button>
           </div>
         
           <div class="tradeContainer hidden">
-
             <form class="predictionForm" data-type="trade">
-              <button class="importsButton active" data-option-group="trade-type">Imports</button>
+              <button class="importsButton" data-option-group="trade-type">Imports</button>
               <button class="exportsButton" data-option-group="trade-type">Exports</button>
             
               <div class="cropsDropdownContainer">
@@ -43,17 +47,15 @@
               </div>
 
               <div class="productionInputContainer">
-                <input type="text" class="productionInput" placeholder="Enter expected production (in tons)">
-                <div class="inputSuggestions"></div>
+                <input type="number" class="productionInput" placeholder="Enter expected production (x1000 tons)" min="0" max="100000" step="0.01">
               </div>
               <button type="submit" class="generateButton">Generate Prediction</button>
             </form>
           </div>
           
           <div class="productionAndYieldContainer hidden">
-            
             <form class="predictionForm" data-type="productionAndYield">
-              <button class="productionButton active" data-option-group="production-type">Production</button>
+              <button class="productionButton" data-option-group="production-type">Production</button>
               <button class="yieldButton" data-option-group="production-type">Yield</button>
 
               <div class="cropsDropdownContainer">
@@ -73,17 +75,15 @@
               </div>
 
               <div class="areaInputContainer">
-                <input type="text" class="areaInput" placeholder="Enter area (x1000 acres)">
-                <div class="inputSuggestions"></div>
+                <input type="number" class="areaInput" placeholder="Enter area (x1000 acres)" min="0" max="30000" step="0.01">
               </div>
               <button type="submit" class="generateButton">Generate Prediction</button>
             </form>
           </div>
           
           <div class="productionAndYieldWithClimateIndexContainer hidden">
-            
             <form class="predictionForm" data-type="productionAndYieldWithClimateIndex">
-              <button class="productionButton active" data-option-group="production-type">Production</button>
+              <button class="productionButton" data-option-group="production-type">Production</button>
               <button class="yieldButton" data-option-group="production-type">Yield</button>
               
               <div class="cropsDropdownContainer">
@@ -103,20 +103,17 @@
               </div>
 
               <div class="areaInputContainer">
-                <input type="text" class="areaInput" placeholder="Enter area (x1000 acres)">
-                <div class="inputSuggestions"></div>
+                <input type="number" class="areaInput" placeholder="Enter area (x1000 acres)" min="0" max="30000" step="0.01">
               </div>
 
               <div class="climateIndexInputContainer">
-                <input type="text" class="climateIndexInput" placeholder="Enter climate index">
-                <div class="inputSuggestions"></div>
+                <input type="number" class="climateIndexInput" placeholder="Enter climate index" min="0" max="1" step="0.01">
               </div>
               <button type="submit" class="generateButton">Generate Prediction</button>
             </form>
           </div>
           
           <div class="climateIndexContainer hidden">
-            
             <form class="predictionForm" data-type="climateIndex">
               <div class="regionsDropdownContainer">
                 <button class="regionsDropdownTrigger">Choose a region</button>
@@ -127,8 +124,7 @@
               </div>
 
               <div class="monthsInputContainer">
-                <input type="text" class="monthsInput" placeholder="Enter the number of months (e.g., 1, 2, ...)">
-                <div class="inputSuggestions"></div>
+                <input type="number" class="monthsInput" placeholder="Enter the number of months (e.g., 1, 2, ...)" min="1" max="24" step="1">
               </div>
               <button type="submit" class="generateButton">Generate Prediction</button>
             </form>
@@ -139,8 +135,11 @@
     </div>
     
     <!-- "Add another" button container -->
-    <div class="addAnotherPredictionButtonContainer" class="hidden">
-      <button id="addAnotherPredictionButton">Add another Prediction</button>
+    <div class="addAnotherPredictionButtonContainer hidden">
+      <button id="addAnotherPredictionButton">
+        <i class="fas fa-plus"></i>
+        Add another prediction
+      </button>
     </div>
   </body>
 </html>
