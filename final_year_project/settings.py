@@ -27,9 +27,9 @@ SECRET_KEY = 'django-insecure-pz*y3dna=j2n-nzntcnmdw!*rzi6=k%$vf7_615u!m4$m_no*4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', 'https://ecocrop.onrender.com/']
+ALLOWED_HOSTS = ['localhost', 'ecocrop.onrender.com']
 
-SITE_ID = 3
+SITE_ID = 4
 
 # Application definition
 
