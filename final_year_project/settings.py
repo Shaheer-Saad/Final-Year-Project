@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-pz*y3dna=j2n-nzntcnmdw!*rzi6=k%$vf7_615u!m4$m_no*4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['localhost', 'https://ecocrop.onrender.com/']
 
 SITE_ID = 3
 
@@ -167,6 +167,6 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_LOGOUT_ON_GET = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://127.0.0.1:8000",
-    "http://localhost:8000"
+    "http://localhost:8000",
+    "https://ecocrop.onrender.com"
 ]
