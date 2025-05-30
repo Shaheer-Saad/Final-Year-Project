@@ -1,0 +1,424 @@
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(-45deg, #1b5e20, #e8f5e9, #2e7d32, #f1f8e9);
+    background-size: 400% 400%;
+    padding: 2rem;
+    animation: gradientBG 15s ease infinite;
+    position: relative;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Container Styles */
+#visualizations-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+#visualizations-container::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+    background-size: 300% 300%;
+    border-radius: 22px;
+    z-index: -2;
+    animation: gradientMove 8s ease infinite;
+}
+
+#visualizations-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    z-index: -1;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.visualization-wrapper {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.3s ease;
+    width: 100%;
+}
+
+.visualization-wrapper:hover {
+    transform: translateY(-5px);
+}
+
+.visualization-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+    background-size: 300% 300%;
+    border-radius: 22px;
+    z-index: -2;
+    animation: gradientMove 8s ease infinite;
+}
+
+.visualization-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    z-index: -1;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Container and Steps */
+.Container {
+    padding: 2rem;
+    position: relative;
+}
+
+.step1,
+.step2,
+.step3,
+.step4 {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.step4 {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.step4 h4 {
+    color: #1b5e20;
+    font-size: 28px;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+/* Dropdown Styles */
+.dropdown-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.dropdown-container label {
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: white;
+    padding: 0 8px;
+    font-size: 13px;
+    color: #4CAF50;
+    font-weight: 600;
+    z-index: 2;
+    transform-origin: left center;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+select {
+    width: 100%;
+    padding: 14px 52px 14px 16px;
+    border: 2px solid rgba(76, 175, 80, 0.2);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #2c3e50;
+    background-color: white;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #4CAF50 50%),
+        linear-gradient(135deg, #4CAF50 50%, transparent 50%);
+    background-position:
+        calc(100% - 20px) center,
+        calc(100% - 15px) center;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+}
+
+select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+select:hover {
+    border-color: #4CAF50;
+    background-color: #f1f8f1;
+}
+
+/* Button Styles */
+button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.next-btn,
+.generate-btn {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+}
+
+.prev-btn,
+.dashboard-btn {
+    background: #f8f9fa;
+    color: #2c3e50;
+    border: 1px solid #e9ecef;
+}
+
+.remove-btn {
+    background: #dc3545;
+    color: white;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Plot Container */
+.plot-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    min-height: 400px;
+    overflow: auto;
+}
+
+.plot-container>div {
+    width: 100% !important;
+    min-height: 400px !important;
+}
+
+/* Axis Containers */
+.yAxis,
+.zAxis {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    border: 1px solid #e9ecef;
+}
+
+/* Error Message */
+.error-message {
+    color: #dc3545;
+    background: #fff5f5;
+    border: 1px solid #ffebeb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-size: 14px;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #4CAF50;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Add Another Button Container */
+#add-another-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+
+#addAnotherVisualizationButton {
+    background: linear-gradient(45deg, #4285f4, #34a853);
+    color: white;
+    padding: 14px 28px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#addAnotherVisualizationButton i {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+#addAnotherVisualizationButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+#addAnotherVisualizationButton:hover i {
+    transform: rotate(90deg);
+}
+
+#addAnotherVisualizationButton:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+
+    .Container {
+        padding: 1rem;
+    }
+
+    .step1,
+    .step2,
+    .step3,
+    .step4 {
+        padding: 1.5rem;
+    }
+
+    button {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .yAxis,
+    .zAxis {
+        padding: 1rem;
+    }
+
+    #addAnotherVisualizationButton {
+        width: 90%;
+        max-width: 300px;
+    }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Animation for step transitions */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step1:not(.hidden),
+.step2:not(.hidden),
+.step3:not(.hidden),
+.step4:not(.hidden) {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Button positioning in step4 */
+.step4 .prev-btn {
+    margin-top: 1rem;
+    align-self: flex-start;
+}

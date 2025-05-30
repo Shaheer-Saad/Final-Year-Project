@@ -1,0 +1,163 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoCrop - Visualizations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'EcoCrop/CSS/Visualizations_page.css' %}"/>
+    <script src="{% static 'EcoCrop/JavaScript/Visualizations_page.js' %}" defer></script>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  </head>
+
+  <body>
+    <div id="visualizations-container">
+      <!-- Visualizations will be added here dynamically -->
+    </div>
+
+    <!-- Hidden template for new visualizations -->
+    <div id="visualization-template" class="hidden">
+      <div class="visualization-wrapper">
+        <div class="Container">
+          <!-- Step 1: Select Category -->
+          <div class="step1">
+            <div class="dropdown-container floating-label">
+              <label id="category">Category</label>
+              <select class="category" id="category">
+                <option value="">Choose...</option>
+                <option value="Climate">Climate</option>
+                <option value="Economy">Economy</option>
+                <option value="Economy with Climate Index">Economy with Climate Index</option>
+                <option value="Production with Climate Index">Production with Climate Index</option>
+                <option value="Yield with Climate Index">Yield with Climate Index</option>
+                <option value="Production and Yield">Production and Yield</option>
+                <option value="Cultivated Area and Production">Cultivated Area and Production</option>
+                <option value="Cultivated Area and Yield">Cultivated Area and Yield</option>
+              </select>
+            </div>
+            <button class="next-btn" onclick="fetchColumns(this)">
+              <span class="btn-text">Next</span>
+            </button>
+            <button class="dashboard-btn" data-dashboard-url="{% url 'Dashboard' %}">Back to Dashboard</button>
+          </div>
+
+          <!-- Step 2: Select Visualization Type -->
+          <div class="step2 hidden">
+            <div class="dropdown-container floating-label">
+              <label for="visType">Type of Visualization</label>
+              <select class="visType" id="visType">
+                <option value="">Choose...</option>
+                <option value="bar">Bar Chart</option>
+                <option value="line">Line Chart</option>
+                <option value="scatter">Scatter Plot</option>
+                <option value="histogram">Histogram</option>
+                <option value="3d">3D Plot</option>
+              </select>
+            </div>
+            <button class="next-btn" onclick="toggleZAxisDropdown(this)">
+              <span class="btn-text">Next</span>
+              <span class="loading-spinner hidden">Loading...</span>
+            </button>
+            <button class="prev-btn">Back</button>
+          </div>
+
+          <!-- Step 3: Select Axes -->
+          <div class="step3 hidden">
+            <div class="error-message hidden"></div>
+
+            <div class="dropdown-container floating-label">
+              <label class="labelForXAxis">X-Axis</label>
+              <select class="xAxis"></select>
+            </div>
+
+            <div class="yAxis" id="yAxisContainer">
+              <div class="generalYAxis hidden">
+                <div class="dropdown-container floating-label">
+                  <label class="labelForGeneralYAxis">Y-Axis</label>
+                  <select class="generalYAxisDropdown" data-axis="y"></select>
+                </div>
+              </div>
+              <div class="specificYAxis hidden">
+                <label class="labelForSpecificYAxis">Y-Axis</label>
+                <br><br>
+                <div class="dropdown-container floating-label">
+                  <label class="labelForCropsForYAxis">Crop</label>
+                  <select
+                    class="cropsForYAxis"
+                    data-axis-type="crop"
+                    data-axis="y"
+                  ></select>
+                </div>
+                <div class="dropdown-container floating-label">
+                  <label class="labelForOtherColumnsForYAxis">Specify a Value for the Crop</label>
+                  <select
+                    class="otherColumnsForYAxis"
+                    data-axis-type="metric"
+                    data-axis="y"
+                  ></select>
+                </div>
+              </div>
+            </div>
+
+            <div class="zAxis" id="zAxisContainer">
+              <div class="generalZAxis hidden">
+                <div class="dropdown-container floating-label">
+                  <label class="labelForGeneralZAxis">Z-Axis</label>
+                  <select class="generalZAxisDropdown" data-axis="z"></select>
+                </div>
+              </div>
+              <div class="specificZAxis hidden">
+                <label class="labelForSpecificZAxis">Z-Axis</label>
+                <div class="dropdown-container floating-label">
+                  <label class="labelForCropsForZAxis">Crop</label>
+                  <select
+                    class="cropsForZAxis"
+                    data-axis-type="crop"
+                    data-axis="z"
+                  ></select>
+                </div>
+                <div class="dropdown-container floating-label">
+                  <label class="labelForOtherColumnsForZAxis">Specify a Value for the Crop</label>
+                  <select
+                    class="otherColumnsForZAxis"
+                    data-axis-type="metric"
+                    data-axis="z"
+                  ></select>
+                </div>
+              </div>
+            </div>
+
+            <button class="generate-btn">
+              <span class="btn-text">Generate</span>
+              <span class="loading-spinner hidden">Generating...</span>
+            </button>
+            <button class="prev-btn">Back</button>
+          </div>
+
+          <!-- Step 4: Display Visualization -->
+          <div class="step4 hidden">
+            <h4>Generated Visualization</h4>
+            <div class="plot-container"></div>
+            <div class="error-message hidden"></div>
+            <button class="prev-btn">Back</button>
+          </div>
+
+          <button class="remove-btn hidden">Remove Visualization</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- "Add another" button container -->
+    <div id="add-another-container" class="hidden">
+      <button id="addAnotherVisualizationButton">
+        <i class="fas fa-plus"></i>
+        Add another visualization
+      </button>
+    </div>
+  </body>
+</html>
